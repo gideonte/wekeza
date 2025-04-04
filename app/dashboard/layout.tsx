@@ -81,24 +81,9 @@ export default function DashboardLayout({
           </div>
           <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center">
-              <div>
-                <Avatar>
-                  <AvatarImage src="/placeholder-user.jpg" alt="User" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  John Doe
-                </p>
-                <Link
-                  href="/login"
-                  className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 flex items-center"
-                >
-                  <LogOut className="mr-1 h-3 w-3" />
-                  Logout
-                </Link>
-              </div>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
             </div>
           </div>
         </div>
@@ -164,24 +149,9 @@ export default function DashboardLayout({
             </nav>
             <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-center">
-                <div>
-                  <SignedIn>
-                    <UserButton />
-                  </SignedIn>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    John Doe
-                  </p>
-                  <Link
-                    href="/login"
-                    className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 flex items-center"
-                    onClick={() => setIsMobileNavOpen(false)}
-                  >
-                    <LogOut className="mr-1 h-3 w-3" />
-                    Logout
-                  </Link>
-                </div>
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
               </div>
             </div>
           </div>
@@ -192,10 +162,9 @@ export default function DashboardLayout({
       <div className="flex flex-col flex-1 overflow-hidden">
         <header className="w-full h-16 flex items-center justify-end px-4 border-b bg-white dark:bg-gray-800 md:justify-end">
           <div className="flex items-center md:hidden">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="/placeholder-user.jpg" alt="User" />
-              <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-4 bg-gray-100 dark:bg-gray-900">
