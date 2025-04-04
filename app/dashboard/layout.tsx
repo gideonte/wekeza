@@ -11,7 +11,6 @@ import {
   FileText,
   FolderOpen,
   Home,
-  LogOut,
   Menu,
   MessageSquare,
   Settings,
@@ -21,7 +20,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function DashboardLayout({
   children,
