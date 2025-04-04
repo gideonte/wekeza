@@ -1,31 +1,35 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { SignedIn, UserButton } from "@clerk/nextjs";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from '@clerk/nextjs'
+  BarChart3,
+  FileText,
+  FolderOpen,
+  Home,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Settings,
+  Users,
+  X,
+} from "lucide-react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { BarChart3, FileText, FolderOpen, Home, LogOut, Menu, MessageSquare, Settings, Users, X } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const pathname = usePathname()
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const pathname = usePathname();
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
@@ -35,7 +39,7 @@ export default function DashboardLayout({
     { name: "Community", href: "/dashboard/community", icon: Users },
     { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
-  ]
+  ];
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
@@ -50,7 +54,7 @@ export default function DashboardLayout({
           <div className="mt-5 flex-grow flex flex-col">
             <nav className="flex-1 px-2 pb-4 space-y-1">
               {navigation.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
@@ -71,7 +75,7 @@ export default function DashboardLayout({
                     />
                     {item.name}
                   </Link>
-                )
+                );
               })}
             </nav>
           </div>
@@ -84,7 +88,9 @@ export default function DashboardLayout({
                 </Avatar>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">John Doe</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  John Doe
+                </p>
                 <Link
                   href="/login"
                   className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 flex items-center"
@@ -101,7 +107,11 @@ export default function DashboardLayout({
       {/* Mobile navigation */}
       <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="md:hidden absolute left-4 top-3 z-40">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden absolute left-4 top-3 z-40"
+          >
             <Menu className="h-6 w-6" />
             <span className="sr-only">Toggle navigation menu</span>
           </Button>
@@ -109,17 +119,25 @@ export default function DashboardLayout({
         <SheetContent side="left" className="w-64 p-0">
           <div className="flex flex-col h-full bg-white dark:bg-gray-800">
             <div className="flex items-center justify-between px-4 py-5 border-b">
-              <Link href="/dashboard" className="flex items-center" onClick={() => setIsMobileNavOpen(false)}>
+              <Link
+                href="/dashboard"
+                className="flex items-center"
+                onClick={() => setIsMobileNavOpen(false)}
+              >
                 <span className="text-xl font-bold">Wekeza</span>
               </Link>
-              <Button variant="ghost" size="icon" onClick={() => setIsMobileNavOpen(false)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileNavOpen(false)}
+              >
                 <X className="h-5 w-5" />
                 <span className="sr-only">Close</span>
               </Button>
             </div>
             <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
               {navigation.map((item) => {
-                const isActive = pathname === item.href
+                const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.name}
@@ -141,18 +159,20 @@ export default function DashboardLayout({
                     />
                     {item.name}
                   </Link>
-                )
+                );
               })}
             </nav>
             <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-center">
                 <div>
-                <SignedIn>
-              <UserButton />
-            </SignedIn>
+                  <SignedIn>
+                    <UserButton />
+                  </SignedIn>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">John Doe</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    John Doe
+                  </p>
                   <Link
                     href="/login"
                     className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 flex items-center"
@@ -178,9 +198,10 @@ export default function DashboardLayout({
             </Avatar>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-4 bg-gray-100 dark:bg-gray-900">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 bg-gray-100 dark:bg-gray-900">
+          {children}
+        </main>
       </div>
     </div>
-  )
+  );
 }
-

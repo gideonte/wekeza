@@ -1,13 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, FileText, Shield, Users } from "lucide-react";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 import { Button } from "@/components/ui/button";
 
