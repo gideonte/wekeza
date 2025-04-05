@@ -12,7 +12,7 @@ export default function Home() {
           <span className="font-bold text-2xl">Wekeza</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link
+          {/* <Link
             className="text-sm font-medium hover:underline underline-offset-4"
             href="#"
           >
@@ -29,7 +29,7 @@ export default function Home() {
             href="#"
           >
             Contact
-          </Link>
+          </Link> */}
         </nav>
         <div className="ml-4 flex items-center gap-2">
           <SignedOut>
@@ -66,11 +66,11 @@ export default function Home() {
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
-                  <Link href="/about">
+                  {/* <Link href="/about">
                     <Button size="lg" variant="outline">
                       Learn More
                     </Button>
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
               <div className="flex flex-col justify-center space-y-4">
@@ -128,12 +128,12 @@ export default function Home() {
           © 2025 Wekeza Group Inc. All rights reserved.
         </p>
         <nav className="sm:ml-auto flex gap-4 sm:gap-6">
-          <Link className="text-xs hover:underline underline-offset-4" href="#">
+          {/* <Link className="text-xs hover:underline underline-offset-4" href="#">
             Terms of Service
           </Link>
           <Link className="text-xs hover:underline underline-offset-4" href="#">
             Privacy
-          </Link>
+          </Link> */}
         </nav>
       </footer>
     </div>

@@ -1,6 +1,12 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowUpRight, DollarSign, LineChart, Users } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowUpRight, DollarSign, LineChart, Users } from "lucide-react";
 
 export default function DashboardPage() {
   return (
@@ -9,17 +15,23 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Investments</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Investments
+            </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+            <p className="text-xs text-muted-foreground">
+              +20.1% from last month
+            </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Investments</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Active Investments
+            </CardTitle>
             <LineChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -44,7 +56,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+12.5%</div>
-            <p className="text-xs text-muted-foreground">+2.1% from last year</p>
+            <p className="text-xs text-muted-foreground">
+              +2.1% from last year
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -62,36 +76,52 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="pl-2">
                 <div className="h-[200px] w-full bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
-                  <p className="text-sm text-muted-foreground">Investment chart will be displayed here</p>
+                  <p className="text-sm text-muted-foreground">
+                    Investment chart will be displayed here
+                  </p>
                 </div>
               </CardContent>
             </Card>
             <Card className="col-span-3">
               <CardHeader>
                 <CardTitle>Upcoming Events</CardTitle>
-                <CardDescription>You have 3 upcoming events this month.</CardDescription>
+                <CardDescription>
+                  You have 3 upcoming events this month.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center">
                     <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
                     <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">Investment Workshop</p>
-                      <p className="text-sm text-muted-foreground">Apr 15, 2025 • 6:00 PM</p>
+                      <p className="text-sm font-medium leading-none">
+                        Investment Workshop
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Apr 15, 2025 • 6:00 PM
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
                     <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">Quarterly Meeting</p>
-                      <p className="text-sm text-muted-foreground">Apr 23, 2025 • 5:30 PM</p>
+                      <p className="text-sm font-medium leading-none">
+                        Quarterly Meeting
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Apr 23, 2025 • 5:30 PM
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="w-2 h-2 rounded-full bg-orange-500 mr-2"></div>
                     <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium leading-none">Financial Literacy Webinar</p>
-                      <p className="text-sm text-muted-foreground">Apr 30, 2025 • 7:00 PM</p>
+                      <p className="text-sm font-medium leading-none">
+                        Financial Literacy Webinar
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Apr 30, 2025 • 7:00 PM
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -103,7 +133,9 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Current Investments</CardTitle>
-              <CardDescription>Overview of your active investment portfolio</CardDescription>
+              <CardDescription>
+                Overview of your active investment portfolio
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -157,7 +189,9 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Your recent actions and notifications</CardDescription>
+              <CardDescription>
+                Your recent actions and notifications
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -165,34 +199,44 @@ export default function DashboardPage() {
                   <div className="w-2 h-2 rounded-full bg-blue-500 mr-2"></div>
                   <div className="flex-1">
                     <p className="text-sm">
-                      <span className="font-medium">Document uploaded:</span> Q1 Financial Report
+                      <span className="font-medium">Document uploaded:</span> Q1
+                      Financial Report
                     </p>
-                    <p className="text-xs text-muted-foreground">Today, 10:30 AM</p>
+                    <p className="text-xs text-muted-foreground">
+                      Today, 10:30 AM
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
                   <div className="flex-1">
                     <p className="text-sm">
-                      <span className="font-medium">Investment completed:</span> Tech Startup Fund
+                      <span className="font-medium">Investment completed:</span>{" "}
+                      Tech Startup Fund
                     </p>
-                    <p className="text-xs text-muted-foreground">Yesterday, 2:15 PM</p>
+                    <p className="text-xs text-muted-foreground">
+                      Yesterday, 2:15 PM
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 rounded-full bg-orange-500 mr-2"></div>
                   <div className="flex-1">
                     <p className="text-sm">
-                      <span className="font-medium">New message:</span> From Sarah about the upcoming meeting
+                      <span className="font-medium">New message:</span> From
+                      Sarah about the upcoming meeting
                     </p>
-                    <p className="text-xs text-muted-foreground">Yesterday, 11:45 AM</p>
+                    <p className="text-xs text-muted-foreground">
+                      Yesterday, 11:45 AM
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center">
                   <div className="w-2 h-2 rounded-full bg-purple-500 mr-2"></div>
                   <div className="flex-1">
                     <p className="text-sm">
-                      <span className="font-medium">Profile updated:</span> Contact information changed
+                      <span className="font-medium">Profile updated:</span>{" "}
+                      Contact information changed
                     </p>
                     <p className="text-xs text-muted-foreground">Apr 2, 2025</p>
                   </div>
@@ -203,6 +247,5 @@ export default function DashboardPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
-

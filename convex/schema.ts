@@ -6,6 +6,10 @@ export default defineSchema({
     name: v.string(),
     // this the Clerk ID, stored in the subject JWT field
     externalId: v.string(),
+    // Add role information
+    role: v.optional(v.string()),
+    email: v.optional(v.string()),
+    profileImage: v.optional(v.string()),
   }).index("byExternalId", ["externalId"]),
 
   documents: defineTable({
@@ -18,7 +22,14 @@ export default defineSchema({
     userId: v.id("users"),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_user", ["userId"]),
+    // Add visibility field
+    isPublished: v.boolean(),
+    // Add file storage ID
+    fileId: v.optional(v.string()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_published", ["isPublished"])
+    .index("by_category", ["category", "isPublished"]),
 
   investments: defineTable({
     name: v.string(),
