@@ -42,7 +42,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory] = useState("all");
   const [currentTab, setCurrentTab] = useState("all");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadFormData, setUploadFormData] = useState({
