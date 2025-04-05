@@ -97,16 +97,20 @@ export default function Home() {
                       participate in group investments.
                     </p>
                   </div>
-                  <div className="flex flex-col items-start gap-2 rounded-lg border p-4">
-                    <div className="rounded-full bg-primary/10 p-2">
-                      <FileText className="h-6 w-6 text-primary" />
+                  <Link href={"/dashboard/documents"}>
+                    <div className="flex flex-col items-start gap-2 rounded-lg border p-4">
+                      <div className="rounded-full bg-primary/10 p-2">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
+                      <h3 className="text-lg font-semibold">
+                        Document Storage
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Securely store and access important financial documents
+                        and resources.
+                      </p>
                     </div>
-                    <h3 className="text-lg font-semibold">Document Storage</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Securely store and access important financial documents
-                      and resources.
-                    </p>
-                  </div>
+                  </Link>
                   <div className="flex flex-col items-start gap-2 rounded-lg border p-4">
                     <div className="rounded-full bg-primary/10 p-2">
                       <Shield className="h-6 w-6 text-primary" />
