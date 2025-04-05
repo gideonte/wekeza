@@ -39,6 +39,22 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 
+// Define a type for the document
+interface DocumentType {
+  _id: Id<"documents">;
+  name: string;
+  type: string;
+  size: number;
+  fileId: string;
+  url: string;
+  category: string;
+  description?: string;
+  userId: string;
+  isPublished: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -78,7 +94,7 @@ export default function DocumentsPage() {
 
   // Filter documents based on search query
   const filteredDocuments = documents.filter(
-    (doc) =>
+    (doc: DocumentType) =>
       doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (doc.description &&
@@ -226,7 +242,7 @@ export default function DocumentsPage() {
   };
 
   // Render document table
-  const renderDocumentTable = (docs: any[]) => {
+  const renderDocumentTable = (docs: DocumentType[]) => {
     if (!docs || docs.length === 0) {
       return (
         <div className="p-8 text-center text-muted-foreground">
