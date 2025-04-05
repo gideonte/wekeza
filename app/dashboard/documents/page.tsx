@@ -226,6 +226,7 @@ export default function DocumentsPage() {
   };
 
   // Render document table
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderDocumentTable = (docs: any[]) => {
     if (!docs || docs.length === 0) {
       return (
