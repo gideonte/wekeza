@@ -36,6 +36,19 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+// Define the Member type to fix TypeScript errors
+interface Member {
+  _id: string;
+  name: string;
+  email?: string;
+  profileImage?: string;
+  role?: string;
+  phone?: string;
+  externalId?: string;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
 export default function MembersPage() {
   // State for search and filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -258,7 +271,7 @@ export default function MembersPage() {
           </div>
         ) : (
           // Members list
-          membersResult.users.map((member) => (
+          membersResult.users.map((member: Member) => (
             <Card key={member._id}>
               <CardContent className="p-6">
                 <div className="flex flex-col space-y-4">
@@ -288,7 +301,7 @@ export default function MembersPage() {
                       <Mail className="mr-2 h-4 w-4" />
                       <span className="truncate">{member.email}</span>
                     </div>
-                    {"phone" in member && member.phone && (
+                    {member.phone && (
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Phone className="mr-2 h-4 w-4" />
                         <span>{member.phone}</span>
