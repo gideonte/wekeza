@@ -242,7 +242,7 @@ export default function EventsPage() {
               <DialogHeader>
                 <DialogTitle>Create New Event</DialogTitle>
                 <DialogDescription>
-                  Add a new event to your organization's calendar.
+                  Add a new event to your organization&lsquo;s calendar.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit}>
