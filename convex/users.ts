@@ -129,3 +129,83 @@ async function userByExternalId(ctx: QueryCtx, externalId: string) {
     .withIndex("byExternalId", (q) => q.eq("externalId", externalId))
     .unique();
 }
+
+// Get all users (members)
+export const getAllUsers = query({
+  args: {
+    search: v.optional(v.string()),
+    role: v.optional(v.string()),
+    limit: v.optional(v.number()),
+    skip: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // Start with the base query
+    let usersQuery = ctx.db.query("users");
+
+    // Apply role filter if provided
+    if (args.role) {
+      usersQuery = usersQuery.filter((q) => q.eq(q.field("role"), args.role));
+    }
+
+    // Collect all users (we'll handle search and pagination in memory)
+    const allUsers = await usersQuery.collect();
+
+    // Apply search filter in memory if needed
+    let filteredUsers = allUsers;
+    if (args.search) {
+      const search = args.search.toLowerCase();
+      filteredUsers = allUsers.filter(
+        (user) =>
+          user.name?.toLowerCase().includes(search) ||
+          user.email?.toLowerCase().includes(search)
+      );
+    }
+
+    // Sort by name
+    filteredUsers.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Calculate total for pagination
+    const total = filteredUsers.length;
+
+    // Apply pagination
+    const skip = args.skip || 0;
+    const limit = args.limit || 50;
+    const paginatedUsers = filteredUsers.slice(skip, skip + limit);
+    const hasMore = filteredUsers.length > skip + limit;
+
+    // Return paginated results
+    return {
+      users: paginatedUsers,
+      total,
+      hasMore,
+    };
+  },
+});
+
+// Get user count by role
+export const getUserCountByRole = query({
+  handler: async (ctx) => {
+    const users = await ctx.db.query("users").collect();
+
+    // Count users by role
+    const roleCounts = {
+      total: users.length,
+      admin: 0,
+      member: 0,
+      secretary: 0,
+      treasurer: 0,
+      president: 0,
+      webmaster: 0,
+    };
+
+    // Count users by role
+    users.forEach((user) => {
+      const role = user.role || "member";
+      if (role in roleCounts) {
+        roleCounts[role as keyof typeof roleCounts]++;
+      }
+    });
+
+    return roleCounts;
+  },
+});

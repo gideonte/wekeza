@@ -47,12 +47,17 @@ export default defineSchema({
     title: v.string(),
     description: v.string(),
     date: v.number(),
+    time: v.string(),
     location: v.optional(v.string()),
     virtual: v.boolean(),
     meetingLink: v.optional(v.string()),
+    color: v.string(), // For the color indicator (green, blue, orange, etc.)
+    createdBy: v.string(), // Admin who created the event
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_date", ["date"]),
+  })
+    .index("by_date", ["date"]) // To sort events by date
+    .index("by_creator", ["createdBy"]), // To filter events by creator
 
   messages: defineTable({
     body: v.string(),

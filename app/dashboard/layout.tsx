@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  Calendar,
   FileText,
   FolderOpen,
   Home,
@@ -33,9 +34,10 @@ export default function DashboardLayout({
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Investments", href: "/dashboard/investments", icon: BarChart3 },
     { name: "Documents", href: "/dashboard/documents", icon: FileText },
+    { name: "Members", href: "/dashboard/members", icon: Users },
     { name: "Resources", href: "/dashboard/resources", icon: FolderOpen },
-    { name: "Community", href: "/dashboard/community", icon: Users },
     { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+    { name: "Events", href: "/dashboard/events", icon: Calendar },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 
