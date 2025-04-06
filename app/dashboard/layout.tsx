@@ -7,14 +7,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3,
+  // BarChart3,
   Calendar,
   FileText,
-  FolderOpen,
   Home,
   Menu,
-  MessageSquare,
-  Settings,
+  // MessageSquare,
+  // Settings,
   Users,
   X,
 } from "lucide-react";
@@ -32,13 +31,13 @@ export default function DashboardLayout({
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
-    { name: "Investments", href: "/dashboard/investments", icon: BarChart3 },
+    // { name: "Investments", href: "/dashboard/investments", icon: BarChart3 },
     { name: "Documents", href: "/dashboard/documents", icon: FileText },
     { name: "Members", href: "/dashboard/members", icon: Users },
-    { name: "Resources", href: "/dashboard/resources", icon: FolderOpen },
-    { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+    // { name: "Resources", href: "/dashboard/resources", icon: FolderOpen },
+    // { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
     { name: "Events", href: "/dashboard/events", icon: Calendar },
-    { name: "Settings", href: "/dashboard/settings", icon: Settings },
+    // { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 
   return (
