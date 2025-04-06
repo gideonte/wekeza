@@ -61,7 +61,9 @@ export default function EventsPage() {
 
   // Fetch data unconditionally
   const isAdmin = useQuery(api.users.isAdmin) || false;
-  const upcomingEvents = useQuery(api.events.getUpcomingEvents) || [];
+  // Fix: Pass the required limit argument to getUpcomingEvents
+  const upcomingEvents =
+    useQuery(api.events.getUpcomingEvents, { limit: undefined }) || [];
   const createEvent = useMutation(api.events.createEvent);
   const updateEvent = useMutation(api.events.updateEvent);
   const deleteEvent = useMutation(api.events.deleteEvent);
@@ -242,7 +244,7 @@ export default function EventsPage() {
               <DialogHeader>
                 <DialogTitle>Create New Event</DialogTitle>
                 <DialogDescription>
-                  Add a new event to your organization&lsquo;s calendar.
+                  Add a new event to your organization&apos;s calendar.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit}>

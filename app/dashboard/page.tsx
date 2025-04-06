@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 export default function DashboardPage() {
   // Fetch data unconditionally
   const isAdmin = useQuery(api.users.isAdmin) || false;
+  // Fix: Pass the required limit argument to getUpcomingEvents
   const upcomingEvents =
     useQuery(api.events.getUpcomingEvents, { limit: 3 }) || [];
 
