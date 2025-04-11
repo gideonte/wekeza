@@ -2,6 +2,9 @@
 
 import type React from "react";
 
+// Import the Id type from Convex
+import type { Id } from "@/convex/_generated/dataModel";
+
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -72,6 +75,12 @@ export default function InvestmentsPage() {
   // Get all contributions (for admin/treasurer)
   const allContributions = useQuery(api.investments.getAllContributions, {});
 
+  // Add the userCounts query to fetch the total number of members
+  // Add this after the other useQuery calls at the top of the component:
+
+  // Get user counts
+  const userCounts = useQuery(api.users.getUserCountByRole);
+
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-CA", {
@@ -124,12 +133,13 @@ export default function InvestmentsPage() {
       >
         <TabsList className="w-full overflow-x-auto flex justify-start sm:justify-center">
           <TabsTrigger value="my-contributions">My Contributions</TabsTrigger>
+          <TabsTrigger value="group-summary">Group Summary</TabsTrigger>
           {isAdminOrTreasurer && (
             <>
               <TabsTrigger value="all-contributions">
                 All Contributions
               </TabsTrigger>
-              <TabsTrigger value="summary">Group Summary</TabsTrigger>
+              <TabsTrigger value="summary">Admin Dashboard</TabsTrigger>
             </>
           )}
         </TabsList>
@@ -307,6 +317,200 @@ export default function InvestmentsPage() {
                   </table>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Group Summary Tab (Visible to all members) */}
+        <TabsContent value="group-summary" className="space-y-8">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Total Contributions
+                </CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {overallSummary ? (
+                  <>
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(overallSummary.totalContributed)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      All member contributions
+                    </p>
+                  </>
+                ) : (
+                  <Skeleton className="h-8 w-24" />
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Monthly Contributions
+                </CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {overallSummary ? (
+                  <>
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(overallSummary.monthlyContributions)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Total monthly contributions
+                    </p>
+                  </>
+                ) : (
+                  <Skeleton className="h-8 w-24" />
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Joining Fees
+                </CardTitle>
+                <User className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {overallSummary ? (
+                  <>
+                    <div className="text-2xl font-bold">
+                      {formatCurrency(overallSummary.joiningFees)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {overallSummary.membersWithJoiningFee} members paid
+                    </p>
+                  </>
+                ) : (
+                  <Skeleton className="h-8 w-24" />
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Contributing Members
+                </CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {overallSummary ? (
+                  <>
+                    <div className="text-2xl font-bold">
+                      {overallSummary.uniqueMembers}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Active contributors
+                    </p>
+                  </>
+                ) : (
+                  <Skeleton className="h-8 w-24" />
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Group Progress */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Group Progress</CardTitle>
+              <CardDescription>
+                Overview of our collective investment journey
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-8">
+                {/* Monthly Contribution Stats */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4">
+                    Monthly Contributions
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Total Monthly Contributions
+                      </span>
+                      <span className="font-bold">
+                        {overallSummary ? (
+                          formatCurrency(overallSummary.monthlyContributions)
+                        ) : (
+                          <Skeleton className="h-4 w-20 inline-block" />
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Average Monthly Contribution
+                      </span>
+                      <span className="font-bold">
+                        {overallSummary && overallSummary.uniqueMembers > 0
+                          ? formatCurrency(
+                              overallSummary.monthlyContributions /
+                                overallSummary.uniqueMembers
+                            )
+                          : formatCurrency(0)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Monthly Target
+                      </span>
+                      <span className="font-bold">
+                        {formatCurrency(100 * (userCounts?.total || 0))}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Joining Fee Stats */}
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Joining Fees</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Total Joining Fees Collected
+                      </span>
+                      <span className="font-bold">
+                        {overallSummary ? (
+                          formatCurrency(overallSummary.joiningFees)
+                        ) : (
+                          <Skeleton className="h-4 w-20 inline-block" />
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Members Paid / Total Members
+                      </span>
+                      <span className="font-bold">
+                        {overallSummary && userCounts ? (
+                          `${overallSummary.membersWithJoiningFee} / ${userCounts.total}`
+                        ) : (
+                          <Skeleton className="h-4 w-20 inline-block" />
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Completion Rate
+                      </span>
+                      <span className="font-bold">
+                        {overallSummary && userCounts && userCounts.total > 0
+                          ? `${Math.round((overallSummary.membersWithJoiningFee / userCounts.total) * 100)}%`
+                          : "0%"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -649,6 +853,15 @@ export default function InvestmentsPage() {
 }
 
 // Add Contribution Dialog Component (Admin/Treasurer Only)
+// Update the Member interface to use the correct Id type
+interface Member {
+  _id: Id<"users">;
+  name: string;
+  email?: string;
+  profileImage?: string;
+  role?: string;
+}
+
 function AddContributionDialog({
   isOpen,
   setIsOpen,
@@ -656,7 +869,7 @@ function AddContributionDialog({
 }: {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  members: any[];
+  members: Member[];
 }) {
   const [formData, setFormData] = useState({
     userId: "",
@@ -697,6 +910,7 @@ function AddContributionDialog({
     setFormData((prev) => ({ ...prev, userId: value }));
   };
 
+  // In the AddContributionDialog component, update the handleSubmit function:
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -704,7 +918,7 @@ function AddContributionDialog({
 
     try {
       await addContribution({
-        userId: formData.userId as any,
+        userId: formData.userId as Id<"users">, // Cast to the correct Id type
         amount: Number.parseFloat(formData.amount),
         date: new Date(formData.date).getTime(),
         month: formData.month,
