@@ -7,13 +7,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  // BarChart3,
+  BarChart3,
   Calendar,
   FileText,
   Home,
   Menu,
-  // MessageSquare,
-  // Settings,
   Users,
   X,
 } from "lucide-react";
@@ -31,7 +29,7 @@ export default function DashboardLayout({
 
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
-    // { name: "Investments", href: "/dashboard/investments", icon: BarChart3 },
+    { name: "Investments", href: "/dashboard/investments", icon: BarChart3 },
     { name: "Documents", href: "/dashboard/documents", icon: FileText },
     { name: "Members", href: "/dashboard/members", icon: Users },
     // { name: "Resources", href: "/dashboard/resources", icon: FolderOpen },

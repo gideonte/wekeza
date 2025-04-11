@@ -29,7 +29,8 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_published", ["isPublished"])
-    .index("by_category", ["category", "isPublished"]),
+    .index("by_category", ["category", "isPublished"])
+    .index("by_createdAt", ["createdAt"]), // Add this index for ordering by createdAt
 
   investments: defineTable({
     name: v.string(),
@@ -42,6 +43,21 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),
+
+  // New table for member contributions
+  contributions: defineTable({
+    userId: v.id("users"),
+    amount: v.number(),
+    date: v.number(), // Date of contribution
+    month: v.string(), // Month and year (e.g., "2023-01")
+    type: v.string(), // "monthly" or "joining_fee"
+    notes: v.optional(v.string()),
+    addedBy: v.id("users"), // Admin or treasurer who added this
+    createdAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_month", ["userId", "month"])
+    .index("by_type", ["type"]),
 
   events: defineTable({
     title: v.string(),

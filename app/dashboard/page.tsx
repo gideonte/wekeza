@@ -3,7 +3,13 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { format } from "date-fns";
-import { ArrowUpRight, DollarSign, LineChart, Users } from "lucide-react";
+import {
+  ArrowUpRight,
+  DollarSign,
+  FileText,
+  LineChart,
+  Users,
+} from "lucide-react";
 
 import {
   Card,
@@ -18,77 +24,155 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
-  // Fetch data unconditionally
+  // Fetch data from Convex
   const isAdmin = useQuery(api.users.isAdmin) || false;
-  // Fix: Pass the required limit argument to getUpcomingEvents
   const upcomingEvents =
     useQuery(api.events.getUpcomingEvents, { limit: 3 }) || [];
-
-  // Inside the DashboardPage component, add this query:
   const userCounts = useQuery(api.users.getUserCountByRole);
+
+  // Get contribution data
+  const contributionSummary = useQuery(
+    api.investments.getOverallContributionSummary,
+    {}
+  );
+
+  // Get recent documents
+  const recentDocuments =
+    useQuery(api.documents.getPublishedDocuments, { limit: 5 }) || [];
+
+  // Get recent contributions
+  const recentContributions =
+    useQuery(api.investments.getAllContributions, {}) || [];
+
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-CA", {
+      style: "currency",
+      currency: "CAD",
+    }).format(amount);
+  };
+
+  // Calculate monthly growth percentage (placeholder for now)
+  const calculateGrowth = () => {
+    return "+5.2%";
+  };
 
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
 
-      {/* Stats cards - improved responsive layout */}
+      {/* Stats cards with real data */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Investments
+              Total Contributions
             </CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
+            {contributionSummary ? (
+              <>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(contributionSummary.totalContributed || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {calculateGrowth()} from last month
+                </p>
+              </>
+            ) : (
+              <>
+                <Skeleton className="h-8 w-32 mb-1" />
+                <Skeleton className="h-4 w-24" />
+              </>
+            )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Active Investments
+              Monthly Contributions
             </CardTitle>
             <LineChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">+2 new this month</p>
+            {contributionSummary ? (
+              <>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(
+                    contributionSummary.monthlyContributions || 0
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {
+                    recentContributions.filter((c) => c.type === "monthly")
+                      .length
+                  }{" "}
+                  contributions
+                </p>
+              </>
+            ) : (
+              <>
+                <Skeleton className="h-8 w-32 mb-1" />
+                <Skeleton className="h-4 w-24" />
+              </>
+            )}
           </CardContent>
         </Card>
-        {/* Then update the Group Members card to show the actual count: */}
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Group Members</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{userCounts?.total || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {userCounts?.total && userCounts.total > 0
-                ? `${userCounts.admin || 0} administrators`
-                : "No members yet"}
-            </p>
+            {userCounts ? (
+              <>
+                <div className="text-2xl font-bold">
+                  {userCounts.total || 0}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {userCounts.total && userCounts.total > 0
+                    ? `${userCounts.admin || 0} administrators`
+                    : "No members yet"}
+                </p>
+              </>
+            ) : (
+              <>
+                <Skeleton className="h-8 w-32 mb-1" />
+                <Skeleton className="h-4 w-24" />
+              </>
+            )}
           </CardContent>
         </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ROI</CardTitle>
+            <CardTitle className="text-sm font-medium">Joining Fees</CardTitle>
             <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12.5%</div>
-            <p className="text-xs text-muted-foreground">
-              +2.1% from last year
-            </p>
+            {contributionSummary ? (
+              <>
+                <div className="text-2xl font-bold">
+                  {formatCurrency(contributionSummary.joiningFees || 0)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {contributionSummary.membersWithJoiningFee || 0} members paid
+                </p>
+              </>
+            ) : (
+              <>
+                <Skeleton className="h-8 w-32 mb-1" />
+                <Skeleton className="h-4 w-24" />
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Tabs - improved responsive layout */}
+      {/* Tabs - with real data */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="w-full overflow-x-auto flex justify-start sm:justify-center">
           <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -100,14 +184,65 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
             <Card className="lg:col-span-4">
               <CardHeader>
-                <CardTitle>Investment Performance</CardTitle>
+                <CardTitle>Contribution Summary</CardTitle>
+                <CardDescription>
+                  Overview of all member contributions
+                </CardDescription>
               </CardHeader>
               <CardContent className="pl-2">
-                <div className="h-[200px] w-full bg-gray-100 dark:bg-gray-800 rounded-md flex items-center justify-center">
-                  <p className="text-sm text-muted-foreground">
-                    Investment chart will be displayed here
-                  </p>
-                </div>
+                {contributionSummary ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Total Contributions
+                        </p>
+                        <p className="text-2xl font-bold">
+                          {formatCurrency(
+                            contributionSummary.totalContributed || 0
+                          )}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Monthly Contributions
+                        </p>
+                        <p className="text-2xl font-bold">
+                          {formatCurrency(
+                            contributionSummary.monthlyContributions || 0
+                          )}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Joining Fees
+                        </p>
+                        <p className="text-2xl font-bold">
+                          {formatCurrency(contributionSummary.joiningFees || 0)}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">
+                          Contributing Members
+                        </p>
+                        <p className="text-2xl font-bold">
+                          {contributionSummary.uniqueMembers || 0}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="pt-4">
+                      <Link href="/dashboard/investments">
+                        <Button variant="outline" className="w-full">
+                          View All Investments
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <Skeleton className="h-[200px] w-full" />
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -189,56 +324,70 @@ export default function DashboardPage() {
         <TabsContent value="investments" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Current Investments</CardTitle>
-              <CardDescription>
-                Overview of your active investment portfolio
-              </CardDescription>
+              <CardTitle>Recent Contributions</CardTitle>
+              <CardDescription>Latest member contributions</CardDescription>
             </CardHeader>
             <CardContent className="overflow-x-auto">
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-lg border p-4">
-                  <div>
-                    <p className="text-sm font-medium">Real Estate Fund</p>
-                    <p className="text-2xl font-bold">$12,500</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Return</p>
-                    <p className="text-2xl font-bold text-green-500">+8.2%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Duration</p>
-                    <p className="text-2xl font-bold">2 years</p>
+              {recentContributions.length === 0 ? (
+                <div className="text-center py-4 text-muted-foreground">
+                  <p>No contributions recorded yet.</p>
+                  {isAdmin && (
+                    <Link
+                      href="/dashboard/investments"
+                      className="mt-2 inline-block"
+                    >
+                      <Button variant="link" size="sm">
+                        Add a contribution
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentContributions.slice(0, 3).map((contribution) => (
+                    <div
+                      key={contribution._id}
+                      className="grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-lg border p-4"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">
+                          {contribution.type === "joining_fee"
+                            ? "Joining Fee"
+                            : "Monthly Contribution"}
+                        </p>
+                        <p className="text-2xl font-bold">
+                          {formatCurrency(contribution.amount)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Date</p>
+                        <p className="text-lg">
+                          {format(new Date(contribution.date), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {contribution.type === "joining_fee"
+                            ? "Type"
+                            : "Month"}
+                        </p>
+                        <p className="text-lg">
+                          {contribution.type === "joining_fee"
+                            ? "One-time"
+                            : contribution.month}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="pt-2">
+                    <Link href="/dashboard/investments">
+                      <Button variant="outline" className="w-full">
+                        View All Contributions
+                      </Button>
+                    </Link>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-lg border p-4">
-                  <div>
-                    <p className="text-sm font-medium">Tech Startup Fund</p>
-                    <p className="text-2xl font-bold">$8,750</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Return</p>
-                    <p className="text-2xl font-bold text-green-500">+15.7%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Duration</p>
-                    <p className="text-2xl font-bold">18 months</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 rounded-lg border p-4">
-                  <div>
-                    <p className="text-sm font-medium">Dividend Portfolio</p>
-                    <p className="text-2xl font-bold">$23,980</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Return</p>
-                    <p className="text-2xl font-bold text-green-500">+6.5%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Duration</p>
-                    <p className="text-2xl font-bold">Ongoing</p>
-                  </div>
-                </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -253,52 +402,78 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mr-2 flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">
-                      <span className="font-medium">Document uploaded:</span> Q1
-                      Financial Report
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Today, 10:30 AM
-                    </p>
+                {/* Recent documents */}
+                {recentDocuments.slice(0, 2).map((doc) => (
+                  <div key={doc._id} className="flex items-center">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 mr-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">
+                        <span className="font-medium">Document available:</span>{" "}
+                        {doc.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(doc.createdAt), "MMM d, yyyy")}
+                      </p>
+                    </div>
+                    <Link
+                      href={doc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button variant="ghost" size="sm" className="ml-2">
+                        <FileText className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                    </Link>
                   </div>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-green-500 mr-2 flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">
-                      <span className="font-medium">Investment completed:</span>{" "}
-                      Tech Startup Fund
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Yesterday, 2:15 PM
-                    </p>
+                ))}
+
+                {/* Recent contributions */}
+                {recentContributions.slice(0, 2).map((contribution) => (
+                  <div key={contribution._id} className="flex items-center">
+                    <div className="w-2 h-2 rounded-full bg-green-500 mr-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">
+                        <span className="font-medium">
+                          {contribution.type === "joining_fee"
+                            ? "Joining fee"
+                            : "Monthly contribution"}
+                          :
+                        </span>{" "}
+                        {formatCurrency(contribution.amount)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(contribution.date), "MMM d, yyyy")}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-orange-500 mr-2 flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">
-                      <span className="font-medium">New message:</span> From
-                      Sarah about the upcoming meeting
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Yesterday, 11:45 AM
-                    </p>
+                ))}
+
+                {/* Recent events */}
+                {upcomingEvents.slice(0, 1).map((event) => (
+                  <div key={event._id} className="flex items-center">
+                    <div className="w-2 h-2 rounded-full bg-purple-500 mr-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">
+                        <span className="font-medium">Upcoming event:</span>{" "}
+                        {event.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(event.date), "MMM d, yyyy")} •{" "}
+                        {event.time}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 rounded-full bg-purple-500 mr-2 flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate">
-                      <span className="font-medium">Profile updated:</span>{" "}
-                      Contact information changed
-                    </p>
-                    <p className="text-xs text-muted-foreground">Apr 2, 2025</p>
-                  </div>
-                </div>
+                ))}
+
+                {/* Show message if no activity */}
+                {recentDocuments.length === 0 &&
+                  recentContributions.length === 0 &&
+                  upcomingEvents.length === 0 && (
+                    <div className="text-center py-4 text-muted-foreground">
+                      <p>No recent activity to display.</p>
+                    </div>
+                  )}
               </div>
             </CardContent>
           </Card>
