@@ -4,9 +4,9 @@ import type React from "react";
 import type { Id } from "@/convex/_generated/dataModel";
 
 import { useState, useRef, useEffect } from "react";
-import { usePaginatedQuery, useMutation } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Send, Trash2, RefreshCw, ChevronDown, Check } from "lucide-react";
+import { Send, Trash2, ChevronDown, Check } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -35,17 +35,8 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Get messages with pagination
-  const {
-    results: messagesData,
-    status,
-    loadMore,
-    isLoading,
-  } = usePaginatedQuery(
-    api.messages.getMessages,
-    {}, // Empty object for any additional arguments (not needed here)
-    { initialNumItems: 25 }
-  );
+  // Get messages with a regular query instead of pagination
+  const messagesData = useQuery(api.messages.getMessages) || [];
 
   // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);
@@ -197,6 +188,9 @@ export default function MessagesPage() {
   const reversedMessages = messagesData ? [...messagesData].reverse() : [];
   const groupedMessages = groupMessagesByDate(reversedMessages);
 
+  // Check if messages are loading
+  const isLoading = messagesData === undefined;
+
   return (
     <div className="container px-4 sm:px-6 py-6 sm:py-10 max-w-full sm:max-w-7xl mx-auto">
       <div className="flex flex-col h-[calc(100vh-12rem)]">
@@ -214,13 +208,6 @@ export default function MessagesPage() {
               <Check className="mr-2 h-4 w-4" />
               Mark All as Read
             </Button>
-
-            {status === "CanLoadMore" && (
-              <Button variant="outline" size="sm" onClick={() => loadMore(10)}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Load More Messages
-              </Button>
-            )}
           </div>
         </div>
 

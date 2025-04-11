@@ -1,35 +1,25 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getCurrentUserOrThrow, getCurrentUser } from "./users";
-import { paginationOptsValidator } from "convex/server";
 
-// Get all messages with pagination
+// Get all messages
 export const getMessages = query({
-  args: {
-    paginationOpts: paginationOptsValidator,
-  },
-  handler: async (ctx, args) => {
+  args: {},
+  handler: async (ctx) => {
     // Use getCurrentUser instead of getCurrentUserOrThrow to avoid throwing an error
     const currentUser = await getCurrentUser(ctx);
 
-    // If user is not authenticated, return empty results with proper pagination structure
+    // If user is not authenticated, return empty results
     if (!currentUser) {
-      return {
-        page: [],
-        continueCursor: null,
-        isDone: true,
-      };
+      return [];
     }
 
-    // Get messages with pagination
-    const messages = await ctx.db
-      .query("messages")
-      .order("desc")
-      .paginate(args.paginationOpts);
+    // Get messages
+    const messages = await ctx.db.query("messages").order("desc").collect();
 
     // For each message, get the user info
     const messagesWithUser = await Promise.all(
-      messages.page.map(async (message) => {
+      messages.map(async (message) => {
         const user = await ctx.db.get(message.userId);
         return {
           ...message,
@@ -46,10 +36,7 @@ export const getMessages = query({
       })
     );
 
-    return {
-      ...messages,
-      page: messagesWithUser,
-    };
+    return messagesWithUser;
   },
 });
 
