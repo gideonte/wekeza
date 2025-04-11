@@ -775,15 +775,12 @@ export default function InvestmentsPage() {
 
                           // Calculate totals
                           let totalContributed = 0;
-                          let monthlyContributions = 0;
                           let hasJoiningFee = false;
 
                           memberContributions.forEach((contribution) => {
                             totalContributed += contribution.amount;
 
-                            if (contribution.type === "monthly") {
-                              monthlyContributions += contribution.amount;
-                            } else if (contribution.type === "joining_fee") {
+                            if (contribution.type === "joining_fee") {
                               hasJoiningFee = true;
                             }
                           });
