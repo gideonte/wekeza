@@ -29,8 +29,7 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_published", ["isPublished"])
-    .index("by_category", ["category", "isPublished"])
-    .index("by_createdAt", ["createdAt"]), // Add this index for ordering by createdAt
+    .index("by_category", ["category", "isPublished"]),
 
   investments: defineTable({
     name: v.string(),
@@ -78,5 +77,16 @@ export default defineSchema({
   messages: defineTable({
     body: v.string(),
     userId: v.id("users"),
+    createdAt: v.number(),
+    // Add an array of user IDs who have read this message
+    readBy: v.array(v.id("users")),
+  })
+    .index("byUserId", ["userId"])
+    .index("byCreatedAt", ["createdAt"]),
+
+  // New table to track last time a user viewed the messages page
+  messageReads: defineTable({
+    userId: v.id("users"),
+    lastReadAt: v.number(),
   }).index("byUserId", ["userId"]),
 });

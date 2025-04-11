@@ -12,12 +12,14 @@ import {
   FileText,
   Home,
   Menu,
+  MessageSquare,
   Users,
   X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { UnreadMessageBadge } from "@/components/unread-message-badge";
 
 export default function DashboardLayout({
   children,
@@ -32,10 +34,13 @@ export default function DashboardLayout({
     { name: "Investments", href: "/dashboard/investments", icon: BarChart3 },
     { name: "Documents", href: "/dashboard/documents", icon: FileText },
     { name: "Members", href: "/dashboard/members", icon: Users },
-    // { name: "Resources", href: "/dashboard/resources", icon: FolderOpen },
-    // { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
+    {
+      name: "Messages",
+      href: "/dashboard/messages",
+      icon: MessageSquare,
+      badge: <UnreadMessageBadge />,
+    },
     { name: "Events", href: "/dashboard/events", icon: Calendar },
-    // { name: "Settings", href: "/dashboard/settings", icon: Settings },
   ];
 
   return (
@@ -70,7 +75,8 @@ export default function DashboardLayout({
                       }`}
                       aria-hidden="true"
                     />
-                    {item.name}
+                    <span className="flex-1">{item.name}</span>
+                    {item.badge}
                   </Link>
                 );
               })}
@@ -139,7 +145,8 @@ export default function DashboardLayout({
                       }`}
                       aria-hidden="true"
                     />
-                    {item.name}
+                    <span className="flex-1">{item.name}</span>
+                    {item.badge}
                   </Link>
                 );
               })}
