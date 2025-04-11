@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { getCurrentUserOrThrow } from "./users";
+import { getCurrentUser } from "./users";
 
 export const getInvestments = query({
   args: {
@@ -100,28 +101,42 @@ export const getAllContributions = query({
     type: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const currentUser = await getCurrentUserOrThrow(ctx);
+    try {
+      const currentUser = await getCurrentUser(ctx);
 
-    // Only admins and treasurers can see all contributions
-    if (!["admin", "treasurer"].includes(currentUser.role || "")) {
-      throw new Error("You don't have permission to view all contributions");
+      // If no user is logged in, return an empty array
+      if (!currentUser) {
+        return [];
+      }
+
+      // Only admins and treasurers can see all contributions
+      // Return empty array instead of throwing an error
+      if (!["admin", "treasurer"].includes(currentUser.role || "")) {
+        console.warn(
+          `User ${currentUser._id} attempted to access all contributions without permission`
+        );
+        return [];
+      }
+
+      let contributionsQuery = ctx.db.query("contributions");
+
+      if (args.month) {
+        contributionsQuery = contributionsQuery.filter((q) =>
+          q.eq(q.field("month"), args.month)
+        );
+      }
+
+      if (args.type) {
+        contributionsQuery = contributionsQuery.filter((q) =>
+          q.eq(q.field("type"), args.type)
+        );
+      }
+
+      return await contributionsQuery.order("desc").collect();
+    } catch (error) {
+      console.error("Error in getAllContributions:", error);
+      return [];
     }
-
-    let contributionsQuery = ctx.db.query("contributions");
-
-    if (args.month) {
-      contributionsQuery = contributionsQuery.filter((q) =>
-        q.eq(q.field("month"), args.month)
-      );
-    }
-
-    if (args.type) {
-      contributionsQuery = contributionsQuery.filter((q) =>
-        q.eq(q.field("type"), args.type)
-      );
-    }
-
-    return await contributionsQuery.order("desc").collect();
   },
 });
 
@@ -248,47 +263,83 @@ export const getUserContributionSummary = query({
 
 // Get overall contribution summary (admin/treasurer only)
 export const getOverallContributionSummary = query({
+  args: {},
   handler: async (ctx) => {
-    const currentUser = await getCurrentUserOrThrow(ctx);
+    try {
+      const currentUser = await getCurrentUser(ctx);
 
-    // Only admins and treasurers can see overall summary
-    if (!["admin", "treasurer"].includes(currentUser.role || "")) {
-      throw new Error(
-        "You don't have permission to view overall contribution summary"
-      );
-    }
-
-    const contributions = await ctx.db.query("contributions").collect();
-
-    // Calculate totals
-    let totalContributed = 0;
-    let monthlyContributions = 0;
-    let joiningFees = 0;
-
-    contributions.forEach((contribution) => {
-      totalContributed += contribution.amount;
-
-      if (contribution.type === "monthly") {
-        monthlyContributions += contribution.amount;
-      } else if (contribution.type === "joining_fee") {
-        joiningFees += contribution.amount;
+      // If no user is logged in, return default values instead of throwing an error
+      if (!currentUser) {
+        return {
+          totalContributed: 0,
+          monthlyContributions: 0,
+          joiningFees: 0,
+          uniqueMembers: 0,
+          membersWithJoiningFee: 0,
+        };
       }
-    });
 
-    // Count unique members who have contributed
-    const uniqueMembers = new Set(contributions.map((c) => c.userId)).size;
+      // Only admins and treasurers can see overall summary
+      // But instead of throwing an error, return empty data for other users
+      if (!["admin", "treasurer"].includes(currentUser.role || "")) {
+        return {
+          totalContributed: 0,
+          monthlyContributions: 0,
+          joiningFees: 0,
+          uniqueMembers: 0,
+          membersWithJoiningFee: 0,
+        };
+      }
 
-    // Count members who have paid joining fee
-    const membersWithJoiningFee = new Set(
-      contributions.filter((c) => c.type === "joining_fee").map((c) => c.userId)
-    ).size;
+      const contributions = await ctx.db.query("contributions").collect();
 
-    return {
-      totalContributed,
-      monthlyContributions,
-      joiningFees,
-      uniqueMembers,
-      membersWithJoiningFee,
-    };
+      // Calculate totals
+      let totalContributed = 0;
+      let monthlyContributions = 0;
+      let joiningFees = 0;
+
+      contributions.forEach((contribution) => {
+        // Make sure amount is a number
+        const amount =
+          typeof contribution.amount === "number" ? contribution.amount : 0;
+        totalContributed += amount;
+
+        if (contribution.type === "monthly") {
+          monthlyContributions += amount;
+        } else if (contribution.type === "joining_fee") {
+          joiningFees += amount;
+        }
+      });
+
+      // Count unique members who have contributed
+      const uniqueMembers = new Set(
+        contributions.map((c) => c.userId.toString())
+      ).size;
+
+      // Count members who have paid joining fee
+      const membersWithJoiningFee = new Set(
+        contributions
+          .filter((c) => c.type === "joining_fee")
+          .map((c) => c.userId.toString())
+      ).size;
+
+      return {
+        totalContributed,
+        monthlyContributions,
+        joiningFees,
+        uniqueMembers,
+        membersWithJoiningFee,
+      };
+    } catch (error) {
+      // Log the error but return default values to prevent UI crashes
+      console.error("Error in getOverallContributionSummary:", error);
+      return {
+        totalContributed: 0,
+        monthlyContributions: 0,
+        joiningFees: 0,
+        uniqueMembers: 0,
+        membersWithJoiningFee: 0,
+      };
+    }
   },
 });
