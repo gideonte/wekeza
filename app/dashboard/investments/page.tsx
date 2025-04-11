@@ -70,7 +70,13 @@ export default function InvestmentsPage() {
   const overallSummary = useQuery(
     api.investments.getOverallContributionSummary,
     {}
-  );
+  ) || {
+    totalContributed: 0,
+    monthlyContributions: 0,
+    joiningFees: 0,
+    uniqueMembers: 0,
+    membersWithJoiningFee: 0,
+  };
 
   // Get all contributions (for admin/treasurer)
   const allContributions = useQuery(api.investments.getAllContributions, {});
@@ -336,7 +342,7 @@ export default function InvestmentsPage() {
                 {overallSummary ? (
                   <>
                     <div className="text-2xl font-bold">
-                      {formatCurrency(overallSummary.totalContributed)}
+                      {formatCurrency(overallSummary.totalContributed || 0)}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       All member contributions
@@ -359,7 +365,7 @@ export default function InvestmentsPage() {
                 {overallSummary ? (
                   <>
                     <div className="text-2xl font-bold">
-                      {formatCurrency(overallSummary.monthlyContributions)}
+                      {formatCurrency(overallSummary.monthlyContributions || 0)}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Total monthly contributions
@@ -382,7 +388,7 @@ export default function InvestmentsPage() {
                 {overallSummary ? (
                   <>
                     <div className="text-2xl font-bold">
-                      {formatCurrency(overallSummary.joiningFees)}
+                      {formatCurrency(overallSummary.joiningFees || 0)}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {overallSummary.membersWithJoiningFee} members paid
@@ -440,7 +446,9 @@ export default function InvestmentsPage() {
                       </span>
                       <span className="font-bold">
                         {overallSummary ? (
-                          formatCurrency(overallSummary.monthlyContributions)
+                          formatCurrency(
+                            overallSummary.monthlyContributions || 0
+                          )
                         ) : (
                           <Skeleton className="h-4 w-20 inline-block" />
                         )}
@@ -453,7 +461,7 @@ export default function InvestmentsPage() {
                       <span className="font-bold">
                         {overallSummary && overallSummary.uniqueMembers > 0
                           ? formatCurrency(
-                              overallSummary.monthlyContributions /
+                              (overallSummary.monthlyContributions || 0) /
                                 overallSummary.uniqueMembers
                             )
                           : formatCurrency(0)}
@@ -480,7 +488,7 @@ export default function InvestmentsPage() {
                       </span>
                       <span className="font-bold">
                         {overallSummary ? (
-                          formatCurrency(overallSummary.joiningFees)
+                          formatCurrency(overallSummary.joiningFees || 0)
                         ) : (
                           <Skeleton className="h-4 w-20 inline-block" />
                         )}
@@ -645,7 +653,7 @@ export default function InvestmentsPage() {
                   {overallSummary ? (
                     <>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(overallSummary.totalContributed)}
+                        {formatCurrency(overallSummary.totalContributed || 0)}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         All member contributions
@@ -668,7 +676,9 @@ export default function InvestmentsPage() {
                   {overallSummary ? (
                     <>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(overallSummary.monthlyContributions)}
+                        {formatCurrency(
+                          overallSummary.monthlyContributions || 0
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Total monthly contributions
@@ -691,7 +701,7 @@ export default function InvestmentsPage() {
                   {overallSummary ? (
                     <>
                       <div className="text-2xl font-bold">
-                        {formatCurrency(overallSummary.joiningFees)}
+                        {formatCurrency(overallSummary.joiningFees || 0)}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {overallSummary.membersWithJoiningFee} members paid
