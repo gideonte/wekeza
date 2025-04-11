@@ -1,6 +1,7 @@
 "use client";
 
 import type React from "react";
+import type { Id } from "@/convex/_generated/dataModel";
 
 import { useState, useRef, useEffect } from "react";
 import { usePaginatedQuery, useMutation } from "convex/react";
@@ -65,11 +66,9 @@ export default function MessagesPage() {
 
       if (unreadMessageIds.length > 0) {
         // Mark these messages as read
-        markMessagesAsRead({ messageIds: unreadMessageIds as any[] }).catch(
-          (error) => {
-            console.error("Failed to mark messages as read:", error);
-          }
-        );
+        markMessagesAsRead({ messageIds: unreadMessageIds }).catch((error) => {
+          console.error("Failed to mark messages as read:", error);
+        });
       }
     }
   }, [messagesData, markMessagesAsRead]);
@@ -102,7 +101,7 @@ export default function MessagesPage() {
   // Handle deleting a message
   const handleDeleteMessage = async (messageId: string) => {
     try {
-      await deleteMessage({ messageId: messageId as any });
+      await deleteMessage({ messageId: messageId as Id<"messages"> });
       toast.success("Message deleted");
     } catch (error) {
       toast.error("Failed to delete message", {
@@ -173,10 +172,10 @@ export default function MessagesPage() {
   };
 
   // Group messages by date
-  const groupMessagesByDate = (messages: any[]) => {
-    const groups: { [key: string]: any[] } = {};
+  const groupMessagesByDate = (messages: typeof messagesData) => {
+    const groups: { [key: string]: typeof messagesData } = {};
 
-    messages.forEach((message) => {
+    messages?.forEach((message) => {
       const date = new Date(message.createdAt).toDateString();
       if (!groups[date]) {
         groups[date] = [];
@@ -275,7 +274,7 @@ export default function MessagesPage() {
                       <div className="flex-grow border-t border-gray-200"></div>
                     </div>
 
-                    {group.messages.map((message: any) => (
+                    {group.messages.map((message) => (
                       <div
                         key={message._id}
                         className="flex items-start gap-3 group"
