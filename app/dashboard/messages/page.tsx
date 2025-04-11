@@ -41,7 +41,11 @@ export default function MessagesPage() {
     status,
     loadMore,
     isLoading,
-  } = usePaginatedQuery(api.messages.getMessages, {}, { initialNumItems: 25 });
+  } = usePaginatedQuery(
+    api.messages.getMessages,
+    {}, // Empty object for any additional arguments (not needed here)
+    { initialNumItems: 25 }
+  );
 
   // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);

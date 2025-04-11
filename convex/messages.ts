@@ -9,8 +9,17 @@ export const getMessages = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    // Make sure user is authenticated
-    const currentUser = await getCurrentUserOrThrow(ctx);
+    // Use getCurrentUser instead of getCurrentUserOrThrow to avoid throwing an error
+    const currentUser = await getCurrentUser(ctx);
+
+    // If user is not authenticated, return empty results with proper pagination structure
+    if (!currentUser) {
+      return {
+        page: [],
+        continueCursor: null,
+        isDone: true,
+      };
+    }
 
     // Get messages with pagination
     const messages = await ctx.db
