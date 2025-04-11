@@ -3,21 +3,24 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Search, UserPlus, Mail, Phone, Shield, User2 } from "lucide-react";
+import {
+  Search,
+  UserPlus,
+  Mail,
+  Shield,
+  User2,
+  MoreHorizontal,
+  Filter,
+  X,
+  Clock,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +38,23 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 // Define the Member type to fix TypeScript errors
 interface Member {
@@ -55,7 +75,8 @@ export default function MembersPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
   const [page, setPage] = useState(1);
-  const ITEMS_PER_PAGE = 12;
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const ITEMS_PER_PAGE = 10;
 
   // Debounce search input
   useEffect(() => {
@@ -107,6 +128,35 @@ export default function MembersPage() {
     }
   };
 
+  // Handle member selection
+  const toggleMemberSelection = (memberId: string) => {
+    setSelectedMembers((prev) =>
+      prev.includes(memberId)
+        ? prev.filter((id) => id !== memberId)
+        : [...prev, memberId]
+    );
+  };
+
+  // Handle select all members
+  const toggleSelectAll = () => {
+    if (membersResult?.users) {
+      if (selectedMembers.length === membersResult.users.length) {
+        setSelectedMembers([]);
+      } else {
+        setSelectedMembers(
+          membersResult.users.map((member: Member) => member._id)
+        );
+      }
+    }
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setRoleFilter(undefined);
+    setSearchQuery("");
+    setDebouncedSearch("");
+  };
+
   // Get initials from name
   const getInitials = (name: string) => {
     return name
@@ -121,27 +171,50 @@ export default function MembersPage() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case "admin":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-red-50 text-red-700 border-red-100";
       case "president":
-        return "bg-purple-100 text-purple-800 border-purple-200";
+        return "bg-purple-50 text-purple-700 border-purple-100";
       case "treasurer":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-50 text-green-700 border-green-100";
       case "secretary":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-blue-50 text-blue-700 border-blue-100";
       case "webmaster":
-        return "bg-orange-100 text-orange-800 border-orange-200";
+        return "bg-orange-50 text-orange-700 border-orange-100";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gray-50 text-gray-700 border-gray-100";
+    }
+  };
+
+  // Format date
+  const formatDate = (timestamp?: number) => {
+    if (!timestamp) return "N/A";
+
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 30) {
+      return `${diffDays} days ago`;
+    } else {
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
     }
   };
 
   return (
     <div className="container px-4 sm:px-6 py-6 sm:py-10 max-w-full sm:max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Group Members</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Members</h1>
           <p className="text-muted-foreground">
-            View and manage all members of the Wekeza Group.
+            {membersResult?.total
+              ? `${membersResult.total} members`
+              : "Loading members..."}
           </p>
         </div>
         {isAdmin && (
@@ -152,201 +225,308 @@ export default function MembersPage() {
         )}
       </div>
 
-      {/* Stats Cards */}
-      {roleCounts && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-6">
-          <Card>
-            <CardContent className="p-4 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium text-muted-foreground">Total</p>
-              <p className="text-2xl font-bold">{roleCounts.total}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium text-muted-foreground">
-                Admins
-              </p>
-              <p className="text-2xl font-bold">{roleCounts.admin}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium text-muted-foreground">
-                President
-              </p>
-              <p className="text-2xl font-bold">{roleCounts.president}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium text-muted-foreground">
-                Treasurer
-              </p>
-              <p className="text-2xl font-bold">{roleCounts.treasurer}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium text-muted-foreground">
-                Secretary
-              </p>
-              <p className="text-2xl font-bold">{roleCounts.secretary}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex flex-col items-center justify-center">
-              <p className="text-sm font-medium text-muted-foreground">
-                Members
-              </p>
-              <p className="text-2xl font-bold">{roleCounts.member}</p>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="flex flex-col sm:flex-row gap-4 mb-6 items-start">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search members..."
-            className="w-full pl-8"
+            placeholder="Search by name or email..."
+            className="w-full pl-10 pr-10 h-10 bg-white border-gray-200"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          {searchQuery && (
+            <button
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Clear search</span>
+            </button>
+          )}
         </div>
-        <Select
-          value={roleFilter || "all"}
-          onValueChange={handleRoleFilterChange}
-        >
-          <SelectTrigger className="w-full sm:w-40">
-            <SelectValue placeholder="Filter by role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="president">President</SelectItem>
-            <SelectItem value="treasurer">Treasurer</SelectItem>
-            <SelectItem value="secretary">Secretary</SelectItem>
-            <SelectItem value="webmaster">Webmaster</SelectItem>
-            <SelectItem value="member">Member</SelectItem>
-          </SelectContent>
-        </Select>
+
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-10 flex-shrink-0"
+              >
+                <Filter className="mr-2 h-4 w-4" />
+                Filter
+                {roleFilter && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-2 bg-primary/10 text-primary"
+                  >
+                    {roleFilter}
+                  </Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] p-6">
+              <SheetHeader className="mb-6">
+                <SheetTitle>Filter Members</SheetTitle>
+                <SheetDescription>
+                  Apply filters to narrow down the member list
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <h3 className="text-sm font-medium">Role</h3>
+                  <Select
+                    value={roleFilter || "all"}
+                    onValueChange={handleRoleFilterChange}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="All Roles" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Roles</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="president">President</SelectItem>
+                      <SelectItem value="treasurer">Treasurer</SelectItem>
+                      <SelectItem value="secretary">Secretary</SelectItem>
+                      <SelectItem value="webmaster">Webmaster</SelectItem>
+                      <SelectItem value="member">Member</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator />
+
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={clearFilters}>
+                    Clear Filters
+                  </Button>
+                  <SheetClose asChild>
+                    <Button>Apply Filters</Button>
+                  </SheetClose>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {selectedMembers.length > 0 && (
+            <Button variant="outline" size="sm" className="h-10">
+              Actions ({selectedMembers.length})
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Members Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Role Stats */}
+      {roleCounts && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
+          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Total</p>
+            <p className="text-2xl font-bold">{roleCounts.total}</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Admins</p>
+            <p className="text-2xl font-bold">{roleCounts.admin}</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">
+              President
+            </p>
+            <p className="text-2xl font-bold">{roleCounts.president}</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">
+              Treasurer
+            </p>
+            <p className="text-2xl font-bold">{roleCounts.treasurer}</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">
+              Secretary
+            </p>
+            <p className="text-2xl font-bold">{roleCounts.secretary}</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Members</p>
+            <p className="text-2xl font-bold">{roleCounts.member}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Members List */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
         {membersResult === undefined ? (
           // Loading state
-          Array.from({ length: 8 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="flex items-center space-x-4">
-                  <Skeleton className="h-12 w-12 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-[150px]" />
-                    <Skeleton className="h-4 w-[100px]" />
+          <div className="p-6">
+            <div className="space-y-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-[200px]" />
+                    <Skeleton className="h-3 w-[150px]" />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))
+              ))}
+            </div>
+          </div>
         ) : membersResult.users.length === 0 ? (
           // Empty state
-          <div className="col-span-full">
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-10">
-                <User2 className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground mb-2">No members found</p>
-                <p className="text-sm text-muted-foreground mb-4 text-center">
-                  {searchQuery
-                    ? `No results for "${searchQuery}"`
-                    : roleFilter
-                      ? `No members with role "${roleFilter}"`
-                      : "There are no members in the system yet."}
-                </p>
-              </CardContent>
-            </Card>
+          <div className="flex flex-col items-center justify-center py-16">
+            <User2 className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-lg font-medium mb-2">No members found</p>
+            <p className="text-sm text-muted-foreground mb-4 text-center max-w-md">
+              {searchQuery
+                ? `No results for "${searchQuery}"`
+                : roleFilter
+                  ? `No members with role "${roleFilter}"`
+                  : "There are no members in the system yet."}
+            </p>
+            {(searchQuery || roleFilter) && (
+              <Button variant="outline" onClick={clearFilters}>
+                Clear Filters
+              </Button>
+            )}
           </div>
         ) : (
-          // Members list
-          membersResult.users.map((member: Member) => (
-            <Card key={member._id}>
-              <CardContent className="p-6">
-                <div className="flex flex-col space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage
-                        src={member.profileImage}
-                        alt={member.name}
+          // Members list table
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200 bg-gray-50/50">
+                  <th className="py-3 px-4 text-left">
+                    <div className="flex items-center">
+                      <Checkbox
+                        checked={
+                          selectedMembers.length ===
+                            membersResult.users.length &&
+                          membersResult.users.length > 0
+                        }
+                        onCheckedChange={toggleSelectAll}
+                        aria-label="Select all members"
+                        className="mr-2"
                       />
-                      <AvatarFallback>
-                        {getInitials(member.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-medium">{member.name}</h3>
+                      <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </span>
+                    </div>
+                  </th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                    Joined
+                  </th>
+                  <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {membersResult.users.map((member: Member) => (
+                  <tr
+                    key={member._id}
+                    className={`hover:bg-gray-50 transition-colors ${selectedMembers.includes(member._id) ? "bg-primary/5" : ""}`}
+                  >
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          checked={selectedMembers.includes(member._id)}
+                          onCheckedChange={() =>
+                            toggleMemberSelection(member._id)
+                          }
+                          aria-label={`Select ${member.name}`}
+                        />
+                        <Avatar className="h-8 w-8 rounded-full flex-shrink-0">
+                          <AvatarImage
+                            src={member.profileImage}
+                            alt={member.name}
+                          />
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                            {getInitials(member.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <div className="font-medium text-gray-900 truncate">
+                            {member.name}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="text-sm text-gray-900 truncate max-w-[150px] sm:max-w-[200px]">
+                        {member.email || "No email"}
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
                       <Badge
                         variant="outline"
-                        className={getRoleBadgeColor(member.role || "member")}
+                        className={`${getRoleBadgeColor(member.role || "member")} text-xs font-medium`}
                       >
                         {member.role || "Member"}
                       </Badge>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Mail className="mr-2 h-4 w-4" />
-                      <span className="truncate">{member.email}</span>
-                    </div>
-                    {member.phone && (
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <Phone className="mr-2 h-4 w-4" />
-                        <span>{member.phone}</span>
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap hidden md:table-cell">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Clock className="h-3.5 w-3.5 mr-1.5" />
+                        {formatDate(member.createdAt)}
                       </div>
-                    )}
-                  </div>
-
-                  {isAdmin && (
-                    <div className="pt-2">
+                    </td>
+                    <td className="py-4 px-4 whitespace-nowrap text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
                           >
-                            Actions
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Member Actions</DropdownMenuLabel>
+                        <DropdownMenuContent align="end" className="w-[180px]">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem>
                             <Mail className="mr-2 h-4 w-4" />
                             <span>Send Message</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Shield className="mr-2 h-4 w-4" />
-                            <span>Change Role</span>
-                          </DropdownMenuItem>
+                          {isAdmin && (
+                            <DropdownMenuItem>
+                              <Shield className="mr-2 h-4 w-4" />
+                              <span>Change Role</span>
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {/* Pagination */}
       {membersResult && membersResult.users.length > 0 && (
-        <div className="mt-6">
-          <Pagination>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+          <div className="text-sm text-muted-foreground order-2 sm:order-1">
+            Showing <span className="font-medium">{skip + 1}</span> to{" "}
+            <span className="font-medium">
+              {skip + membersResult.users.length}
+            </span>{" "}
+            of{" "}
+            <span className="font-medium">{membersResult.total || "many"}</span>{" "}
+            members
+          </div>
+
+          <Pagination className="order-1 sm:order-2">
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
