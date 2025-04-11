@@ -71,7 +71,13 @@ export const getUserContributions = query({
     userId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
-    const currentUser = await getCurrentUserOrThrow(ctx);
+    // Use getCurrentUser instead of getCurrentUserOrThrow to avoid throwing an error
+    const currentUser = await getCurrentUser(ctx);
+
+    // If no user is authenticated, return an empty array
+    if (!currentUser) {
+      return [];
+    }
 
     // If no userId is provided, use the current user's ID
     const userId = args.userId || currentUser._id;
@@ -81,9 +87,8 @@ export const getUserContributions = query({
       currentUser._id !== userId &&
       !["admin", "treasurer"].includes(currentUser.role || "")
     ) {
-      throw new Error(
-        "You don't have permission to view other members' contributions"
-      );
+      // Return empty array instead of throwing an error
+      return [];
     }
 
     return await ctx.db
@@ -213,7 +218,19 @@ export const getUserContributionSummary = query({
     userId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
-    const currentUser = await getCurrentUserOrThrow(ctx);
+    // Use getCurrentUser instead of getCurrentUserOrThrow
+    const currentUser = await getCurrentUser(ctx);
+
+    // If no user is authenticated, return default values
+    if (!currentUser) {
+      return {
+        totalContributed: 0,
+        monthlyContributions: 0,
+        joiningFee: 0,
+        hasJoiningFee: false,
+        contributionCount: 0,
+      };
+    }
 
     // If no userId is provided, use the current user's ID
     const userId = args.userId || currentUser._id;
@@ -223,9 +240,14 @@ export const getUserContributionSummary = query({
       currentUser._id !== userId &&
       !["admin", "treasurer"].includes(currentUser.role || "")
     ) {
-      throw new Error(
-        "You don't have permission to view other members' contributions"
-      );
+      // Return default values instead of throwing an error
+      return {
+        totalContributed: 0,
+        monthlyContributions: 0,
+        joiningFee: 0,
+        hasJoiningFee: false,
+        contributionCount: 0,
+      };
     }
 
     const contributions = await ctx.db
