@@ -105,7 +105,7 @@ export default function MembersPage() {
   });
 
   // Fetch role counts
-  const roleCounts = useQuery(api.users.getUserCountByRole);
+  // Remove line: const roleCounts = useQuery(api.users.getUserCountByRole)
 
   // Check if current user is admin
   const isAdmin = useQuery(api.users.isAdmin) || false;

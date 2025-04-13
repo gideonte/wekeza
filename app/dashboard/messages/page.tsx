@@ -3,7 +3,7 @@
 import type React from "react";
 import type { Id } from "@/convex/_generated/dataModel";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Send, Trash2, ChevronDown, Check } from "lucide-react";
@@ -36,7 +36,11 @@ export default function MessagesPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Get messages with a regular query instead of pagination
-  const messagesData = useQuery(api.messages.getMessages) || [];
+  const messagesQueryResult = useQuery(api.messages.getMessages);
+  const messagesData = useMemo(
+    () => messagesQueryResult || [],
+    [messagesQueryResult]
+  );
 
   // Mutations
   const sendMessage = useMutation(api.messages.sendMessage);
@@ -271,7 +275,11 @@ export default function MessagesPage() {
                         className="flex items-start gap-3 group"
                       >
                         <Avatar className="h-10 w-10 flex-shrink-0">
-                          <AvatarImage src={message.user?.profileImage} />
+                          <AvatarImage
+                            src={
+                              message.user?.profileImage || "/placeholder.svg"
+                            }
+                          />
                           <AvatarFallback>
                             {message.user
                               ? getInitials(message.user.name)
