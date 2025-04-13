@@ -319,42 +319,6 @@ export default function MembersPage() {
         </div>
       </div>
 
-      {/* Role Stats */}
-      {roleCounts && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 mb-8">
-          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Total</p>
-            <p className="text-2xl font-bold">{roleCounts.total}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Admins</p>
-            <p className="text-2xl font-bold">{roleCounts.admin}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">
-              President
-            </p>
-            <p className="text-2xl font-bold">{roleCounts.president}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">
-              Treasurer
-            </p>
-            <p className="text-2xl font-bold">{roleCounts.treasurer}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">
-              Secretary
-            </p>
-            <p className="text-2xl font-bold">{roleCounts.secretary}</p>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-4 flex flex-col items-center justify-center shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Members</p>
-            <p className="text-2xl font-bold">{roleCounts.member}</p>
-          </div>
-        </div>
-      )}
-
       {/* Members List */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
         {membersResult === undefined ? (
@@ -444,7 +408,7 @@ export default function MembersPage() {
                         />
                         <Avatar className="h-8 w-8 rounded-full flex-shrink-0">
                           <AvatarImage
-                            src={member.profileImage}
+                            src={member.profileImage || "/placeholder.svg"}
                             alt={member.name}
                           />
                           <AvatarFallback className="bg-primary/10 text-primary text-xs">
