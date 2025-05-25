@@ -4,10 +4,11 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { format } from "date-fns";
 import {
-  ArrowUpRight,
+  Calendar,
   DollarSign,
   FileText,
   LineChart,
+  User,
   Users,
 } from "lucide-react";
 
@@ -24,6 +25,17 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
+  // Check if user is admin or treasurer
+  const currentUser = useQuery(api.users.current);
+  const isAdminOrTreasurer =
+    currentUser?.role === "admin" || currentUser?.role === "treasurer";
+
+  // Get user contribution summary (for regular members)
+  const userContributionSummary = useQuery(
+    api.investments.getUserContributionSummary,
+    {}
+  );
+
   // Fetch data from Convex
   const isAdmin = useQuery(api.users.isAdmin) || false;
   const upcomingEvents =
@@ -44,12 +56,21 @@ export default function DashboardPage() {
   const recentContributions =
     useQuery(api.investments.getAllContributions, {}) || [];
 
+  // Get user contributions
+  const userContributions =
+    useQuery(api.investments.getUserContributions, {}) || [];
+
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-CA", {
       style: "currency",
       currency: "CAD",
     }).format(amount);
+  };
+
+  // Format date - handle both Date objects and timestamps
+  const formatDate = (date: Date | number) => {
+    return format(new Date(date), "MMM d, yyyy");
   };
 
   // Calculate monthly growth percentage (placeholder for now)
@@ -71,13 +92,33 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {contributionSummary ? (
+            {isAdminOrTreasurer ? (
+              // Admin/Treasurer view - show overall contributions
+              contributionSummary ? (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(contributionSummary.totalContributed || 0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {calculateGrowth()} from last month
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Skeleton className="h-8 w-32 mb-1" />
+                  <Skeleton className="h-4 w-24" />
+                </>
+              )
+            ) : // Regular member view - show personal contributions
+            userContributionSummary ? (
               <>
                 <div className="text-2xl font-bold">
-                  {formatCurrency(contributionSummary.totalContributed || 0)}
+                  {formatCurrency(
+                    userContributionSummary.totalContributed || 0
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {calculateGrowth()} from last month
+                  Your lifetime contributions
                 </p>
               </>
             ) : (
@@ -97,19 +138,40 @@ export default function DashboardPage() {
             <LineChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {contributionSummary ? (
+            {isAdminOrTreasurer ? (
+              // Admin/Treasurer view
+              contributionSummary ? (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(
+                      contributionSummary.monthlyContributions || 0
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {
+                      recentContributions.filter((c) => c.type === "monthly")
+                        .length
+                    }{" "}
+                    contributions
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Skeleton className="h-8 w-32 mb-1" />
+                  <Skeleton className="h-4 w-24" />
+                </>
+              )
+            ) : // Regular member view
+            userContributionSummary ? (
               <>
                 <div className="text-2xl font-bold">
                   {formatCurrency(
-                    contributionSummary.monthlyContributions || 0
+                    userContributionSummary.monthlyContributions || 0
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {
-                    recentContributions.filter((c) => c.type === "monthly")
-                      .length
-                  }{" "}
-                  contributions
+                  {userContributionSummary.contributionCount || 0} months
+                  contributed
                 </p>
               </>
             ) : (
@@ -149,17 +211,40 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Joining Fees</CardTitle>
-            <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Joining Fee</CardTitle>
+            <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {contributionSummary ? (
+            {isAdminOrTreasurer ? (
+              // Admin/Treasurer view
+              contributionSummary ? (
+                <>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(contributionSummary.joiningFees || 0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {contributionSummary.membersWithJoiningFee || 0} members
+                    paid
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Skeleton className="h-8 w-32 mb-1" />
+                  <Skeleton className="h-4 w-24" />
+                </>
+              )
+            ) : // Regular member view
+            userContributionSummary ? (
               <>
                 <div className="text-2xl font-bold">
-                  {formatCurrency(contributionSummary.joiningFees || 0)}
+                  {userContributionSummary.hasJoiningFee
+                    ? formatCurrency(userContributionSummary.joiningFee)
+                    : "Not Paid"}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {contributionSummary.membersWithJoiningFee || 0} members paid
+                  {userContributionSummary.hasJoiningFee
+                    ? "Paid in full"
+                    : "Required to join"}
                 </p>
               </>
             ) : (
@@ -186,24 +271,218 @@ export default function DashboardPage() {
               <CardHeader>
                 <CardTitle>Contribution Summary</CardTitle>
                 <CardDescription>
-                  Overview of all member contributions
+                  {isAdminOrTreasurer
+                    ? "Overview of all member contributions"
+                    : "Overview of your personal contributions"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {contributionSummary ? (
+                {isAdminOrTreasurer ? (
+                  // Admin/Treasurer view - show overall summary
+                  contributionSummary ? (
+                    <div className="space-y-6">
+                      {/* Summary Cards */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-gray-500">
+                              Total Contributions
+                            </h3>
+                            <DollarSign className="h-4 w-4 text-emerald-500" />
+                          </div>
+                          <p className="text-2xl font-bold text-emerald-600">
+                            {formatCurrency(
+                              contributionSummary.totalContributed || 0
+                            )}
+                          </p>
+                          <div className="mt-2 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="bg-emerald-500 h-full rounded-full"
+                              style={{ width: "100%" }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-gray-500">
+                              Monthly Contributions
+                            </h3>
+                            <LineChart className="h-4 w-4 text-blue-500" />
+                          </div>
+                          <p className="text-2xl font-bold text-blue-600">
+                            {formatCurrency(
+                              contributionSummary.monthlyContributions || 0
+                            )}
+                          </p>
+                          <div className="mt-2 flex items-center text-xs">
+                            <span className="text-gray-500">
+                              {
+                                recentContributions.filter(
+                                  (c) => c.type === "monthly"
+                                ).length
+                              }{" "}
+                              contributions
+                            </span>
+                            <span className="ml-auto text-blue-600 font-medium">
+                              {calculateGrowth()}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-gray-500">
+                              Joining Fees
+                            </h3>
+                            <Users className="h-4 w-4 text-purple-500" />
+                          </div>
+                          <p className="text-2xl font-bold text-purple-600">
+                            {formatCurrency(
+                              contributionSummary.joiningFees || 0
+                            )}
+                          </p>
+                          <div className="mt-2 flex items-center text-xs">
+                            <span className="text-gray-500">
+                              {contributionSummary.membersWithJoiningFee || 0}{" "}
+                              members paid
+                            </span>
+                            {userCounts && (
+                              <div className="ml-auto flex items-center">
+                                <div className="h-2 w-16 bg-gray-100 rounded-full overflow-hidden mr-2">
+                                  <div
+                                    className="bg-purple-500 h-full rounded-full"
+                                    style={{
+                                      width: userCounts.total
+                                        ? `${Math.min(100, (contributionSummary.membersWithJoiningFee / userCounts.total) * 100)}%`
+                                        : "0%",
+                                    }}
+                                  ></div>
+                                </div>
+                                <span className="text-purple-600 font-medium">
+                                  {userCounts.total
+                                    ? Math.round(
+                                        (contributionSummary.membersWithJoiningFee /
+                                          userCounts.total) *
+                                          100
+                                      )
+                                    : 0}
+                                  %
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-medium text-gray-500">
+                              Contributing Members
+                            </h3>
+                            <Users className="h-4 w-4 text-amber-500" />
+                          </div>
+                          <p className="text-2xl font-bold text-amber-600">
+                            {contributionSummary.uniqueMembers || 0}
+                          </p>
+                          <div className="mt-2 flex items-center text-xs">
+                            <span className="text-gray-500">
+                              Active contributors
+                            </span>
+                            {userCounts && (
+                              <div className="ml-auto flex items-center">
+                                <div className="h-2 w-16 bg-gray-100 rounded-full overflow-hidden mr-2">
+                                  <div
+                                    className="bg-amber-500 h-full rounded-full"
+                                    style={{
+                                      width: userCounts.total
+                                        ? `${Math.min(100, (contributionSummary.uniqueMembers / userCounts.total) * 100)}%`
+                                        : "0%",
+                                    }}
+                                  ></div>
+                                </div>
+                                <span className="text-amber-600 font-medium">
+                                  {userCounts.total
+                                    ? Math.round(
+                                        (contributionSummary.uniqueMembers /
+                                          userCounts.total) *
+                                          100
+                                      )
+                                    : 0}
+                                  %
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Monthly Trend */}
+                      <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
+                        <h3 className="text-sm font-medium text-gray-500 mb-3">
+                          Contribution Trend
+                        </h3>
+                        <div className="flex items-end h-16 gap-1">
+                          {Array.from({ length: 12 }).map((_, i) => {
+                            // Generate random heights for the demo
+                            const height = 20 + Math.random() * 80;
+                            const isCurrentMonth = i === new Date().getMonth();
+                            return (
+                              <div
+                                key={i}
+                                className="flex-1 flex flex-col items-center"
+                              >
+                                <div
+                                  className={`w-full rounded-t-sm ${isCurrentMonth ? "bg-primary" : "bg-primary/40"}`}
+                                  style={{ height: `${height}%` }}
+                                ></div>
+                                <span className="text-[10px] text-gray-500 mt-1">
+                                  {format(new Date(2023, i, 1), "MMM").charAt(
+                                    0
+                                  )}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <Link href="/dashboard/investments">
+                          <Button className="w-full">
+                            View Detailed Investment Report
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                          <Skeleton
+                            key={i}
+                            className="h-24 w-full rounded-lg"
+                          />
+                        ))}
+                      </div>
+                      <Skeleton className="h-24 w-full rounded-lg" />
+                      <Skeleton className="h-10 w-full rounded-lg" />
+                    </div>
+                  )
+                ) : // Regular member view - show personal contribution summary
+                userContributionSummary ? (
                   <div className="space-y-6">
-                    {/* Summary Cards */}
+                    {/* Personal Summary Cards */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-sm font-medium text-gray-500">
-                            Total Contributions
+                            Total Contributed
                           </h3>
                           <DollarSign className="h-4 w-4 text-emerald-500" />
                         </div>
                         <p className="text-2xl font-bold text-emerald-600">
                           {formatCurrency(
-                            contributionSummary.totalContributed || 0
+                            userContributionSummary.totalContributed || 0
                           )}
                         </p>
                         <div className="mt-2 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -223,17 +502,13 @@ export default function DashboardPage() {
                         </div>
                         <p className="text-2xl font-bold text-blue-600">
                           {formatCurrency(
-                            contributionSummary.monthlyContributions || 0
+                            userContributionSummary.monthlyContributions || 0
                           )}
                         </p>
                         <div className="mt-2 flex items-center text-xs">
                           <span className="text-gray-500">
-                            {
-                              recentContributions.filter(
-                                (c) => c.type === "monthly"
-                              ).length
-                            }{" "}
-                            contributions
+                            {userContributionSummary.contributionCount || 0}{" "}
+                            months contributed
                           </span>
                           <span className="ml-auto text-blue-600 font-medium">
                             {calculateGrowth()}
@@ -244,119 +519,81 @@ export default function DashboardPage() {
                       <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-sm font-medium text-gray-500">
-                            Joining Fees
+                            Joining Fee
                           </h3>
-                          <Users className="h-4 w-4 text-purple-500" />
+                          <User className="h-4 w-4 text-purple-500" />
                         </div>
                         <p className="text-2xl font-bold text-purple-600">
-                          {formatCurrency(contributionSummary.joiningFees || 0)}
+                          {userContributionSummary.hasJoiningFee
+                            ? formatCurrency(userContributionSummary.joiningFee)
+                            : "Not Paid"}
                         </p>
                         <div className="mt-2 flex items-center text-xs">
                           <span className="text-gray-500">
-                            {contributionSummary.membersWithJoiningFee || 0}{" "}
-                            members paid
+                            {userContributionSummary.hasJoiningFee
+                              ? "Paid in full"
+                              : "Required to join"}
                           </span>
-                          {userCounts && (
-                            <div className="ml-auto flex items-center">
-                              <div className="h-2 w-16 bg-gray-100 rounded-full overflow-hidden mr-2">
-                                <div
-                                  className="bg-purple-500 h-full rounded-full"
-                                  style={{
-                                    width: userCounts.total
-                                      ? `${Math.min(100, (contributionSummary.membersWithJoiningFee / userCounts.total) * 100)}%`
-                                      : "0%",
-                                  }}
-                                ></div>
-                              </div>
-                              <span className="text-purple-600 font-medium">
-                                {userCounts.total
-                                  ? Math.round(
-                                      (contributionSummary.membersWithJoiningFee /
-                                        userCounts.total) *
-                                        100
-                                    )
-                                  : 0}
-                                %
-                              </span>
-                            </div>
-                          )}
                         </div>
                       </div>
 
                       <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-2">
                           <h3 className="text-sm font-medium text-gray-500">
-                            Contributing Members
+                            Next Contribution
                           </h3>
-                          <Users className="h-4 w-4 text-amber-500" />
+                          <Calendar className="h-4 w-4 text-amber-500" />
                         </div>
                         <p className="text-2xl font-bold text-amber-600">
-                          {contributionSummary.uniqueMembers || 0}
+                          {formatCurrency(100)}
                         </p>
                         <div className="mt-2 flex items-center text-xs">
                           <span className="text-gray-500">
-                            Active contributors
+                            Due on the 1st of next month
                           </span>
-                          {userCounts && (
-                            <div className="ml-auto flex items-center">
-                              <div className="h-2 w-16 bg-gray-100 rounded-full overflow-hidden mr-2">
-                                <div
-                                  className="bg-amber-500 h-full rounded-full"
-                                  style={{
-                                    width: userCounts.total
-                                      ? `${Math.min(100, (contributionSummary.uniqueMembers / userCounts.total) * 100)}%`
-                                      : "0%",
-                                  }}
-                                ></div>
-                              </div>
-                              <span className="text-amber-600 font-medium">
-                                {userCounts.total
-                                  ? Math.round(
-                                      (contributionSummary.uniqueMembers /
-                                        userCounts.total) *
-                                        100
-                                    )
-                                  : 0}
-                                %
-                              </span>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Monthly Trend */}
+                    {/* Personal Contribution History */}
                     <div className="bg-white rounded-lg border border-gray-100 p-4 shadow-sm">
                       <h3 className="text-sm font-medium text-gray-500 mb-3">
-                        Contribution Trend
+                        Your Recent Contributions
                       </h3>
-                      <div className="flex items-end h-16 gap-1">
-                        {Array.from({ length: 12 }).map((_, i) => {
-                          // Generate random heights for the demo
-                          const height = 20 + Math.random() * 80;
-                          const isCurrentMonth = i === new Date().getMonth();
-                          return (
+                      <div className="space-y-3">
+                        {userContributions && userContributions.length > 0 ? (
+                          userContributions.slice(0, 3).map((contribution) => (
                             <div
-                              key={i}
-                              className="flex-1 flex flex-col items-center"
+                              key={contribution._id}
+                              className="flex justify-between items-center border-b pb-2"
                             >
-                              <div
-                                className={`w-full rounded-t-sm ${isCurrentMonth ? "bg-primary" : "bg-primary/40"}`}
-                                style={{ height: `${height}%` }}
-                              ></div>
-                              <span className="text-[10px] text-gray-500 mt-1">
-                                {format(new Date(2023, i, 1), "MMM").charAt(0)}
-                              </span>
+                              <div>
+                                <p className="font-medium">
+                                  {contribution.type === "joining_fee"
+                                    ? "Joining Fee"
+                                    : "Monthly Contribution"}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {formatDate(contribution.date)}
+                                </p>
+                              </div>
+                              <p className="font-bold">
+                                {formatCurrency(contribution.amount)}
+                              </p>
                             </div>
-                          );
-                        })}
+                          ))
+                        ) : (
+                          <p className="text-center text-gray-500 py-2">
+                            No contributions recorded yet
+                          </p>
+                        )}
                       </div>
                     </div>
 
                     <div className="pt-2">
                       <Link href="/dashboard/investments">
                         <Button className="w-full">
-                          View Detailed Investment Report
+                          View Your Contribution History
                         </Button>
                       </Link>
                     </div>
