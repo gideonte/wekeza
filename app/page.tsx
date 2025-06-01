@@ -5,21 +5,7 @@ import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import {
-  ArrowRight,
-  BarChart3,
-  FileText,
-  Shield,
-  Users,
-  TrendingUp,
-  MessageSquare,
-  Calendar,
-  DollarSign,
-  Award,
-  CheckCircle,
-  Menu,
-  X,
-} from "lucide-react";
+import { ArrowRight, Users, TrendingUp, Award, Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -272,8 +258,8 @@ export default function Home() {
                 About Wekeza Group
               </h2>
               <p className="mt-3 sm:mt-4 text-gray-600 text-base sm:text-lg md:text-xl max-w-3xl mx-auto px-4">
-                Wekeza, meaning "to invest" in Swahili, represents our
-                commitment to empowering communities through collective
+                Wekeza, meaning &ldquo;to invest&ldquo; in Swahili, represents
+                our commitment to empowering communities through collective
                 financial growth and education.
               </p>
             </div>
@@ -390,7 +376,7 @@ export default function Home() {
               </h2>
               <p className="mt-3 sm:mt-4 text-gray-600 text-base sm:text-lg md:text-xl max-w-3xl mx-auto px-4">
                 Interested in joining Wekeza Group or need support? Send us a
-                message and we'll get back to you.
+                message and we&lsquo;ll get back to you.
               </p>
             </div>
             <div className="grid gap-6 sm:gap-8 md:grid-cols-2 max-w-4xl mx-auto">
@@ -407,8 +393,8 @@ export default function Home() {
                 <CardContent className="space-y-4">
                   <p className="text-gray-600 text-sm sm:text-base">
                     Our platform is exclusively available to registered Wekeza
-                    Group members. If you're already a member, click below to
-                    access your account.
+                    Group members. If you&lsquo;re already a member, click below
+                    to access your account.
                   </p>
                   <Link href="/dashboard" className="block">
                     <Button className="w-full">
@@ -427,14 +413,14 @@ export default function Home() {
                     Send us a Message
                   </CardTitle>
                   <CardDescription className="text-sm sm:text-base">
-                    Fill out the form below and we'll respond as soon as
+                    Fill out the form below and we&lsquo;ll respond as soon as
                     possible.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleContactSubmit} className="space-y-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="name">Full Name *</Label>
+                      <Label htmlFor="name">Full Name</Label>
                       <Input
                         id="name"
                         name="name"
@@ -445,7 +431,7 @@ export default function Home() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="email">Email Address *</Label>
+                      <Label htmlFor="email">Email Address</Label>
                       <Input
                         id="email"
                         name="email"
@@ -468,7 +454,7 @@ export default function Home() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="reason">Reason for Contact *</Label>
+                      <Label htmlFor="reason">Reason for Contact</Label>
                       <Select
                         value={contactForm.reason}
                         onValueChange={handleReasonChange}
@@ -487,7 +473,7 @@ export default function Home() {
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="message">Message *</Label>
+                      <Label htmlFor="message">Message</Label>
                       <Textarea
                         id="message"
                         name="message"
