@@ -100,8 +100,8 @@ export default function EventsPage() {
     e.preventDefault();
 
     try {
-      // Convert date string to timestamp
-      const dateTimestamp = new Date(formData.date).getTime();
+      // Convert date string to timestamp - ensure we're using the date as-is without timezone shifts
+      const dateTimestamp = new Date(formData.date + "T00:00:00").getTime();
 
       await createEvent({
         title: formData.title,
@@ -143,17 +143,36 @@ export default function EventsPage() {
     if (!event) return;
 
     setSelectedEvent(eventId);
-    setFormData({
-      title: event.title,
-      description: event.description,
-      date: format(new Date(event.date), "yyyy-MM-dd"),
-      time: event.time,
-      location: event.location || "",
-      virtual: event.virtual,
-      meetingLink: event.meetingLink || "",
-      color: event.color,
-    });
-    setIsEditOpen(true);
+    try {
+      // Validate the event date
+      if (!event.date || isNaN(event.date)) {
+        console.error("Invalid event date:", event.date);
+        toast.error("Invalid event date");
+        return;
+      }
+
+      const eventDate = new Date(event.date);
+      if (isNaN(eventDate.getTime())) {
+        console.error("Invalid event date:", event.date);
+        toast.error("Invalid event date");
+        return;
+      }
+
+      setFormData({
+        title: event.title,
+        description: event.description,
+        date: new Date(event.date).toISOString().split("T")[0], // This ensures we get YYYY-MM-DD format
+        time: event.time,
+        location: event.location || "",
+        virtual: event.virtual,
+        meetingLink: event.meetingLink || "",
+        color: event.color,
+      });
+      setIsEditOpen(true);
+    } catch (error) {
+      console.error("Error formatting event date:", error);
+      toast.error("Error loading event data");
+    }
   };
 
   // Handle form submission for updating an event
@@ -163,8 +182,8 @@ export default function EventsPage() {
     if (!selectedEvent) return;
 
     try {
-      // Convert date string to timestamp
-      const dateTimestamp = new Date(formData.date).getTime();
+      // Convert date string to timestamp - ensure we're using the date as-is without timezone shifts
+      const dateTimestamp = new Date(formData.date + "T00:00:00").getTime();
 
       await updateEvent({
         id: selectedEvent,
@@ -220,7 +239,23 @@ export default function EventsPage() {
 
   // Format date for display
   const formatDate = (timestamp: number) => {
-    return format(new Date(timestamp), "EEEE, MMMM d, yyyy");
+    try {
+      // Validate timestamp
+      if (!timestamp || isNaN(timestamp)) {
+        return "Invalid date";
+      }
+
+      const date = new Date(timestamp);
+      // Check if the date is valid
+      if (isNaN(date.getTime())) {
+        return "Invalid date";
+      }
+
+      return format(date, "EEEE, MMMM d, yyyy");
+    } catch (error) {
+      console.error("Error formatting date:", error, "Timestamp:", timestamp);
+      return "Invalid date";
+    }
   };
 
   return (

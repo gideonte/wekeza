@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import {
   Calendar,
   DollarSign,
@@ -68,9 +69,24 @@ export default function DashboardPage() {
     }).format(amount);
   };
 
-  // Format date - handle both Date objects and timestamps
-  const formatDate = (date: Date | number) => {
-    return format(new Date(date), "MMM d, yyyy");
+  // Format date - handle both Date objects and timestamps with validation
+  const formatDate = (date: Date | number | undefined | null) => {
+    try {
+      // Check if date is valid
+      if (date === undefined || date === null) return "Invalid date";
+
+      const dateObj = typeof date === "number" ? new Date(date) : date;
+
+      // Check if date is valid
+      if (isNaN(dateObj.getTime())) return "Invalid date";
+
+      // Convert to Edmonton timezone
+      const edmontonTime = toZonedTime(dateObj, "America/Edmonton");
+      return format(edmontonTime, "MMM d, yyyy");
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Invalid date";
+    }
   };
 
   // Calculate monthly growth percentage (placeholder for now)
@@ -674,8 +690,7 @@ export default function DashboardPage() {
                             {event.title}
                           </p>
                           <p className="text-sm text-muted-foreground truncate">
-                            {format(new Date(event.date), "MMM d, yyyy")} •{" "}
-                            {event.time}
+                            {formatDate(event.date)} • {event.time}
                           </p>
                         </div>
                       </div>
@@ -728,7 +743,7 @@ export default function DashboardPage() {
                       <div>
                         <p className="text-sm font-medium">Date</p>
                         <p className="text-lg">
-                          {format(new Date(contribution.date), "MMM d, yyyy")}
+                          {formatDate(contribution.date)}
                         </p>
                       </div>
                       <div>
@@ -778,7 +793,7 @@ export default function DashboardPage() {
                         {doc.name}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(doc.createdAt), "MMM d, yyyy")}
+                        {formatDate(doc.createdAt)}
                       </p>
                     </div>
                     <Link
@@ -809,7 +824,7 @@ export default function DashboardPage() {
                         {formatCurrency(contribution.amount)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(contribution.date), "MMM d, yyyy")}
+                        {formatDate(contribution.date)}
                       </p>
                     </div>
                   </div>
@@ -825,8 +840,7 @@ export default function DashboardPage() {
                         {event.title}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(event.date), "MMM d, yyyy")} •{" "}
-                        {event.time}
+                        {formatDate(event.date)} • {event.time}
                       </p>
                     </div>
                   </div>
