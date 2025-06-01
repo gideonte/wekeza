@@ -89,4 +89,13 @@ export default defineSchema({
     userId: v.id("users"),
     lastReadAt: v.number(),
   }).index("byUserId", ["userId"]),
+
+  contactInquiries: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    reason: v.union(v.literal("new_membership"), v.literal("support")),
+    message: v.string(),
+    submittedAt: v.number(),
+  }).index("by_reason", ["reason"]),
 });
