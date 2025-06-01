@@ -208,9 +208,9 @@ export default function Home() {
                     </span>
                   </h1>
                   <p className="max-w-[600px] text-gray-600 text-base sm:text-lg md:text-xl mx-auto lg:mx-0">
-                    Wekeza Group enables financial growth through group
-                    investments, education, and secure strategies. Join a
-                    community committed to prosperity.
+                    Wekeza enables financial growth through group investments,
+                    education, and secure strategies. Join a community committed
+                    to prosperity.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
@@ -235,10 +235,10 @@ export default function Home() {
               {/* Replaced cards with a modern investment-themed image */}
               <div className="hidden md:flex justify-center items-center">
                 <Image
-                  src="/wekezaHero.png"
+                  src="/wekezaHeroo.png"
                   alt="Group investment growth visualization"
-                  width={400}
-                  height={400}
+                  width={600}
+                  height={600}
                   className="object-cover"
                   priority
                 />
@@ -502,7 +502,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="flex flex-col gap-2 sm:flex-row py-4 sm:py-6 w-full border-t px-4 md:px-6 bg-white">
         <p className="text-xs text-gray-500 text-center sm:text-left">
-          © {new Date().getFullYear()} Wekeza Group Inc. All rights reserved.
+          © {new Date().getFullYear()} Wekeza Inc. All rights reserved.
         </p>
         {/* <nav className="sm:ml-auto flex gap-4 sm:gap-6 justify-center sm:justify-end">
           <Link className="text-xs hover:underline underline-offset-4" href="#">
