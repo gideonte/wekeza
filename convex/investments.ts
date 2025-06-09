@@ -212,6 +212,100 @@ export const addContribution = mutation({
   },
 });
 
+// Edit a contribution (admin/treasurer only)
+export const editContribution = mutation({
+  args: {
+    contributionId: v.id("contributions"),
+    amount: v.optional(v.number()),
+    date: v.optional(v.number()),
+    month: v.optional(v.string()),
+    type: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const currentUser = await getCurrentUserOrThrow(ctx);
+
+    // Only admins and treasurers can edit contributions
+    if (!["admin", "treasurer"].includes(currentUser.role || "")) {
+      throw new Error("You don't have permission to edit contributions");
+    }
+
+    const contribution = await ctx.db.get(args.contributionId);
+    if (!contribution) {
+      throw new Error("Contribution not found");
+    }
+
+    // If changing type or month, validate duplicates
+    if (args.type && args.type !== contribution.type) {
+      if (args.type === "monthly") {
+        const monthToCheck = args.month || contribution.month;
+        const existingContribution = await ctx.db
+          .query("contributions")
+          .withIndex("by_user_and_month", (q) =>
+            q.eq("userId", contribution.userId).eq("month", monthToCheck)
+          )
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("type"), "monthly"),
+              q.neq(q.field("_id"), args.contributionId)
+            )
+          )
+          .first();
+
+        if (existingContribution) {
+          throw new Error(
+            `A monthly contribution for ${monthToCheck} already exists for this user`
+          );
+        }
+      }
+
+      if (args.type === "joining_fee") {
+        const existingJoiningFee = await ctx.db
+          .query("contributions")
+          .withIndex("by_user", (q) => q.eq("userId", contribution.userId))
+          .filter((q) =>
+            q.and(
+              q.eq(q.field("type"), "joining_fee"),
+              q.neq(q.field("_id"), args.contributionId)
+            )
+          )
+          .first();
+
+        if (existingJoiningFee) {
+          throw new Error("This user already has a joining fee contribution");
+        }
+      }
+    }
+
+    const { contributionId, ...updates } = args;
+    return await ctx.db.patch(contributionId, {
+      ...updates,
+    });
+  },
+});
+
+// Delete a contribution (admin/treasurer only)
+export const deleteContribution = mutation({
+  args: {
+    contributionId: v.id("contributions"),
+  },
+  handler: async (ctx, args) => {
+    const currentUser = await getCurrentUserOrThrow(ctx);
+
+    // Only admins and treasurers can delete contributions
+    if (!["admin", "treasurer"].includes(currentUser.role || "")) {
+      throw new Error("You don't have permission to delete contributions");
+    }
+
+    const contribution = await ctx.db.get(args.contributionId);
+    if (!contribution) {
+      throw new Error("Contribution not found");
+    }
+
+    return await ctx.db.delete(args.contributionId);
+  },
+});
+
 // Get contribution summary for a user
 export const getUserContributionSummary = query({
   args: {
