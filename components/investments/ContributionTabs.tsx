@@ -1,16 +1,14 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MyContributionsTab from "./MyContributionsTab";
 import GroupSummaryTab from "./GroupSummaryTab";
-import AllContributionsTab from "./AllContributionsTab";
 import AdminDashboardTab from "./AdminDashboardTab";
 
 export default function ContributionTabs({
   selectedTab,
   setSelectedTab,
   isAdminOrTreasurer,
-  setIsAddDialogOpen,
 }: {
   selectedTab: string;
   setSelectedTab: (tab: string) => void;

@@ -5,6 +5,7 @@ import React from "react";
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { format } from "date-fns";
 import {
   Edit,
@@ -68,10 +69,33 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
+// Type definitions
+interface Contribution {
+  _id: Id<"contributions">;
+  _creationTime: number;
+  userId: Id<"users">;
+  amount: number;
+  date: number;
+  month: string;
+  type: string; // Changed from union type to string to match actual data
+  notes?: string;
+  createdAt: number;
+  addedBy: Id<"users">;
+}
+
+interface Member {
+  _id: Id<"users">;
+  name: string;
+  email?: string;
+  profileImage?: string;
+  role?: string;
+}
+
 export default function AdminDashboardTab() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedContribution, setSelectedContribution] = useState<any>(null);
+  const [selectedContribution, setSelectedContribution] =
+    useState<Contribution | null>(null);
   const [expandedMembers, setExpandedMembers] = useState<Set<string>>(
     new Set()
   );
@@ -81,23 +105,11 @@ export default function AdminDashboardTab() {
   const isAdminOrTreasurer =
     currentUser?.role === "admin" || currentUser?.role === "treasurer";
 
-  const overallSummary = useQuery(
-    api.investments.getOverallContributionSummary,
-    {}
-  ) || {
-    totalContributed: 0,
-    monthlyContributions: 0,
-    joiningFees: 0,
-    uniqueMembers: 0,
-    membersWithJoiningFee: 0,
-  };
-
   const allMembers = useQuery(api.users.getAllUsers, { limit: 100 });
   const allContributions =
     useQuery(api.investments.getAllContributions, {}) || [];
 
   // Mutations
-  const editContribution = useMutation(api.investments.editContribution);
   const deleteContribution = useMutation(api.investments.deleteContribution);
 
   const formatCurrency = (amount: number) => {
@@ -132,13 +144,13 @@ export default function AdminDashboardTab() {
   };
 
   // Handle edit contribution
-  const handleEditContribution = (contribution: any) => {
+  const handleEditContribution = (contribution: Contribution) => {
     setSelectedContribution(contribution);
     setIsEditDialogOpen(true);
   };
 
   // Handle delete contribution
-  const handleDeleteContribution = (contribution: any) => {
+  const handleDeleteContribution = (contribution: Contribution) => {
     setSelectedContribution(contribution);
     setIsDeleteDialogOpen(true);
   };
@@ -192,13 +204,14 @@ export default function AdminDashboardTab() {
                 const isExpanded = expandedMembers.has(member._id);
 
                 let totalContributed = 0;
+
                 let hasJoiningFee = false;
 
                 memberContributions.forEach((contribution) => {
-                  totalContributed += contribution.amount;
                   if (contribution.type === "joining_fee") {
                     hasJoiningFee = true;
                   }
+                  totalContributed += contribution.amount;
                 });
 
                 return (
@@ -489,20 +502,20 @@ export default function AdminDashboardTab() {
               contribution record.
               {selectedContribution && (
                 <div className="mt-2 p-2 bg-gray-50 rounded">
-                  <p className="text-sm">
+                  <div className="text-sm">
                     <strong>Amount:</strong>{" "}
                     {formatCurrency(selectedContribution.amount)}
-                  </p>
-                  <p className="text-sm">
+                  </div>
+                  <div className="text-sm">
                     <strong>Type:</strong>{" "}
                     {selectedContribution.type === "joining_fee"
                       ? "Joining Fee"
                       : "Monthly Contribution"}
-                  </p>
-                  <p className="text-sm">
+                  </div>
+                  <div className="text-sm">
                     <strong>Date:</strong>{" "}
                     {formatDate(selectedContribution.date)}
-                  </p>
+                  </div>
                 </div>
               )}
             </AlertDialogDescription>
@@ -532,8 +545,8 @@ function EditContributionDialog({
 }: {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
-  contribution: any;
-  members: any[];
+  contribution: Contribution;
+  members: Member[];
   onSuccess: () => void;
 }) {
   const [formData, setFormData] = useState({
