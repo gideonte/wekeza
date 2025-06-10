@@ -235,7 +235,7 @@ export default function Home() {
               {/* Replaced cards with a modern investment-themed image */}
               <div className="hidden md:flex justify-center items-center">
                 <Image
-                  src="/wekezaHeroo.png"
+                  src="/wekezaHeader.png"
                   alt="Group investment growth visualization"
                   width={600}
                   height={600}
