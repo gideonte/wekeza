@@ -384,7 +384,7 @@ export const getOverallContributionSummary = query({
     try {
       const currentUser = await getCurrentUser(ctx);
 
-      // If no user is logged in, return default values instead of throwing an error
+      // Allow all authenticated users to see group summary
       if (!currentUser) {
         return {
           totalContributed: 0,
@@ -395,17 +395,7 @@ export const getOverallContributionSummary = query({
         };
       }
 
-      // Only admins and treasurers can see overall summary
-      // But instead of throwing an error, return empty data for other users
-      if (!["admin", "treasurer"].includes(currentUser.role || "")) {
-        return {
-          totalContributed: 0,
-          monthlyContributions: 0,
-          joiningFees: 0,
-          uniqueMembers: 0,
-          membersWithJoiningFee: 0,
-        };
-      }
+      // All authenticated users can see group summary (no role restriction)
 
       const contributions = await ctx.db.query("contributions").collect();
 
